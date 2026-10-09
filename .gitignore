@@ -11,3 +11,8 @@ media/*
 
 # Project database source/build files (maintained outside GitHub)
 DATABASE/
+# Environment files contain private deployment configuration; commit only example templates.
+.env
+.env.*
+!.env.example
+!**/.env.example
