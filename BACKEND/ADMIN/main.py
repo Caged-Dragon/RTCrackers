@@ -22,6 +22,7 @@ from ADMINS.permissions.routes import router as permissions_router
 from ADMINS.dashboard.routes import router as dashboard_router
 from ADMINS.products.routes import router as products_router
 from ADMINS.combos.routes import router as combos_router
+from ADMINS.mail.routes import router as mail_router
 from ADMINS.categories.routes import router as categories_router
 from ADMINS.inventory.routes import router as inventory_router
 from ADMINS.orders.routes import router as orders_router
