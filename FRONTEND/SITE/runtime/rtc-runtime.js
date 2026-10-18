@@ -2,6 +2,20 @@
 (() => {
   'use strict';
   const root = document.documentElement;
+
+  // Browser zoom/pinch-zoom and available viewport size are visitor-local
+  // presentation preferences. Normalize the viewport without disabling zoom;
+  // never persist viewport dimensions, scale, or layout in the database.
+  const viewportMeta = document.querySelector('meta[name="viewport"]');
+  if (viewportMeta) {
+    viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0, viewport-fit=cover');
+  } else {
+    const meta = document.createElement('meta');
+    meta.name = 'viewport';
+    meta.content = 'width=device-width, initial-scale=1.0, viewport-fit=cover';
+    document.head.appendChild(meta);
+  }
+
   const cfg = Object.assign({
     customerApi: '/api/v1',
     adminApi: '/api/v1/admin',
