@@ -234,7 +234,7 @@ async def upload_combo_image(
         (content_type == "image/jpeg" and data.startswith(b"\xff\xd8\xff"))
         or (content_type == "image/png" and data.startswith(b"\x89PNG\r\n\x1a\n"))
         or (content_type == "image/webp" and data[:4] == b"RIFF" and data[8:12] == b"WEBP")
-        or (content_type == "image/avif" and b"ftypavif" in data[:24] or b"ftypavis" in data[:24])
+        or (content_type == "image/avif" and (b"ftypavif" in data[:24] or b"ftypavis" in data[:24]))
     )
     if not valid:
         raise HTTPException(status_code=415, detail="The uploaded file does not match its declared image type")
