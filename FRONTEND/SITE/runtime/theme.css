@@ -208,3 +208,42 @@ table {
   .rtc-combo-admin-card { gap:.7rem; padding:.7rem; }
   .rtc-combo-admin-card>img { width:76px; height:76px; }
 }
+
+
+/* Live values from Supabase theme_page_settings for the active SITE runtime. */
+:root {
+  --rtc-db-background: var(--rtc-cream);
+  --rtc-db-surface: var(--rtc-white);
+  --rtc-db-text: var(--rtc-ink);
+  --rtc-db-muted: var(--rtc-muted);
+  --rtc-db-heading: var(--rtc-red);
+  --rtc-db-primary: var(--rtc-red);
+  --rtc-db-primary-dark: var(--rtc-red-dark);
+  --rtc-db-secondary: var(--rtc-gold);
+  --rtc-db-accent: var(--rtc-gold);
+  --rtc-db-link: var(--rtc-red);
+  --rtc-db-border: var(--rtc-border);
+}
+html[data-database-theme^="cart:"] body {
+  background: var(--rtc-db-background, var(--rtc-cream)) !important;
+  color: var(--rtc-db-text, var(--rtc-ink)) !important;
+  font-family: var(--rtc-db-font-body, Inter, system-ui, sans-serif);
+}
+html[data-database-theme^="admin:"] body {
+  background: var(--rtc-db-background, var(--rtc-cream)) !important;
+  color: var(--rtc-db-text, var(--rtc-ink)) !important;
+}
+html[data-database-theme] h1, html[data-database-theme] h2, html[data-database-theme] h3 {
+  color: var(--rtc-db-heading, var(--rtc-red));
+  font-family: var(--rtc-db-font-heading, inherit);
+}
+html[data-database-theme] a:not(.rtc-combo-enquire) { color: var(--rtc-db-link, var(--rtc-red)); }
+html[data-database-theme] .bg-primary, html[data-database-theme] .bg-primary-container,
+html[data-database-theme] .rtc-combo-primary, html[data-database-theme] .rtc-combo-enquire {
+  background-color: var(--rtc-db-button-background, var(--rtc-db-primary, var(--rtc-red))) !important;
+  color: var(--rtc-db-button-text, #fff) !important;
+}
+html[data-database-theme] .rtc-combo-card, html[data-database-theme] .rtc-combo-admin-card {
+  border-color: var(--rtc-db-border, var(--rtc-border));
+  border-radius: var(--rtc-db-radius-medium, 1rem);
+}
