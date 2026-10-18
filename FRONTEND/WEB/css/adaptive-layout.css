@@ -80,3 +80,119 @@ main, section, article, aside, header, footer { min-width: 0; }
 .account-grid.rt-runtime-grid { align-items: start; }
 @media (prefers-reduced-motion: reduce) { .adm-side, .rt-shell-header, .rt-shell-mobile { transition: none !important; } }
 
+
+
+
+/* Final responsive pass: all sizing is local to the current visitor's viewport.
+   These rules intentionally do not save layout, zoom, or section dimensions. */
+html {
+  min-width: 0;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+}
+body {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+input, select, textarea, button {
+  max-width: 100%;
+  min-width: 0;
+}
+button, input, select, textarea {
+  touch-action: manipulation;
+}
+table, pre, code {
+  max-width: 100%;
+}
+pre, .pre-wrap {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.tbl-wrap, .table-responsive, .rt-runtime-overflow-x {
+  max-width: 100%;
+  overflow-x: auto !important;
+  overscroll-behavior-inline: contain;
+}
+.adm-content, .adm-panel, .adm-panel > *, .adm-top .container,
+.grid-form > *, .add-row > *, .cat-add-row > * {
+  min-width: 0;
+  max-width: 100%;
+}
+.adm-panel {
+  padding: clamp(12px, 2.2vw, 24px);
+}
+.adm-tabs {
+  max-width: 100%;
+}
+.adm-tabs .adm-tab {
+  flex: 0 0 auto;
+  max-width: 100%;
+  white-space: normal;
+}
+.adm-layout.rt-admin-stacked {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+}
+.adm-layout.rt-admin-stacked .adm-side,
+.adm-layout.rt-admin-stacked .adm-side.rt-runtime-collapsed,
+.adm-layout.rt-admin-stacked .adm-side.rt-runtime-expanded {
+  position: relative !important;
+  inset: auto !important;
+  order: 0;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  max-height: 132px;
+  overflow: auto;
+  padding: 6px;
+  box-sizing: border-box;
+}
+.adm-layout.rt-admin-stacked .adm-side-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  justify-content: space-between;
+  padding: 4px 6px;
+  background: #0f131d;
+}
+.adm-layout.rt-admin-stacked .adm-side-nav {
+  display: flex;
+  flex-flow: row nowrap;
+  gap: 6px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  padding: 4px;
+}
+.adm-layout.rt-admin-stacked .adm-side.rt-runtime-expanded .adm-side-nav {
+  flex-wrap: wrap;
+}
+.adm-layout.rt-admin-stacked .adm-side .adm-tab {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.adm-layout.rt-admin-stacked .adm-content {
+  width: 100%;
+  min-width: 0;
+  grid-column: auto !important;
+}
+.adm-layout.rt-admin-stacked .adm-panel {
+  width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 640px) {
+  .adm-top { padding-block: 12px; }
+  .adm-top .container { align-items: flex-start; }
+  .adm-panel h1, .adm-panel h2, .adm-panel h3 { overflow-wrap: anywhere; }
+  .grid-form { grid-template-columns: minmax(0, 1fr) !important; }
+  .add-row, .cat-add-row { grid-template-columns: minmax(0, 1fr) !important; }
+  table.adm { font-size: 12px; }
+  .row-actions { flex-wrap: wrap; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
