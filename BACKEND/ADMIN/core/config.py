@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     SUPABASE_URL: str | None = None
     SUPABASE_SERVICE_ROLE_KEY: str | None = None
     SUPABASE_STORAGE_BUCKET: str = 'combo-pack-images'
+    RESEND_API_KEY: str | None = None
+    RESEND_FROM_NAME: str = 'RT Crackers'
     MAX_UPLOAD_MB: int = 5
     JWT_SECRET_KEY:str=Field(...,min_length=32); JWT_ALGORITHM:str='HS256'; ACCESS_TOKEN_EXPIRE_MINUTES:int=30; REFRESH_TOKEN_EXPIRE_DAYS:int=14; PASSWORD_RESET_EXPIRE_MINUTES:int=30
     MAX_FAILED_LOGINS:int=5; RATE_LIMIT_ENABLED:bool=True; RATE_LIMIT_PER_MINUTE:int=240; RATE_LIMIT_AUTH_PER_MINUTE:int=20
