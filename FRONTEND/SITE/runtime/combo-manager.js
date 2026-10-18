@@ -4,6 +4,7 @@
  */
 (() => {
   'use strict';
+  function attachComboManager() {
   const api = window.RTApi;
   if (!api) return;
   const esc = api.escapeHtml || (v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])));
@@ -256,6 +257,8 @@
     if (isHome || isCataloguePage) mountCustomerCombos();
     mountAdminComboManager();
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true});
-  else boot();
+  boot();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', attachComboManager, {once:true});
+  else attachComboManager();
 })();
