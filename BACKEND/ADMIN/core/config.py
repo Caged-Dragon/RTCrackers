@@ -14,6 +14,11 @@ class Settings(BaseSettings):
     AUTH_COOKIE_DOMAIN:str|None=None; AUTH_COOKIE_SECURE:bool=True; AUTH_COOKIE_SAMESITE:Literal['lax','strict','none']='lax'
     DATABASE_URL:str=Field(...); MIGRATION_DATABASE_URL:str|None=None; DB_SSL_MODE:Literal['disable','require','verify-full']='require'; DB_SSL_CA_FILE:str|None=None
     DB_PGBOUNCER:bool|None=None; DB_NULL_POOL:bool=False; DB_POOL_SIZE:int=5; DB_MAX_OVERFLOW:int=10; DB_POOL_TIMEOUT:int=30; DB_POOL_RECYCLE:int=1800; DB_CONNECT_TIMEOUT:int=15; DB_COMMAND_TIMEOUT:int=60; DB_ECHO:bool=False
+    # Server-only credentials for the shared combo catalogue (never expose to clients).
+    SUPABASE_URL: str | None = None
+    SUPABASE_SERVICE_ROLE_KEY: str | None = None
+    SUPABASE_STORAGE_BUCKET: str = 'combo-pack-images'
+    MAX_UPLOAD_MB: int = 5
     JWT_SECRET_KEY:str=Field(...,min_length=32); JWT_ALGORITHM:str='HS256'; ACCESS_TOKEN_EXPIRE_MINUTES:int=30; REFRESH_TOKEN_EXPIRE_DAYS:int=14; PASSWORD_RESET_EXPIRE_MINUTES:int=30
     MAX_FAILED_LOGINS:int=5; RATE_LIMIT_ENABLED:bool=True; RATE_LIMIT_PER_MINUTE:int=240; RATE_LIMIT_AUTH_PER_MINUTE:int=20
     EMAIL_BACKEND:Literal['smtp','console','memory']='console'; SMTP_HOST:str='localhost'; SMTP_PORT:int=587; SMTP_USERNAME:str|None=None; SMTP_PASSWORD:str|None=None; SMTP_USE_TLS:bool=False; SMTP_START_TLS:bool=True; EMAIL_FROM:str='RT Crackers <no-reply@rtcrackers.com>'
