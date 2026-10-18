@@ -17,6 +17,7 @@
 
   const routes = {
     inbox: "/FRONTEND/EMAIL/PAGES/inbox.html",
+    login: "/FRONTEND/EMAIL/PAGES/login.html",
     sent: "/FRONTEND/EMAIL/PAGES/sent.html",
     drafts: "/FRONTEND/EMAIL/PAGES/drafts.html",
     starred: "/FRONTEND/EMAIL/PAGES/starred.html",
@@ -324,6 +325,7 @@
       await hydrateCompose();
       if (/inbox/i.test(page)) notify("RTC Crackers Mail connected");
     } catch (err) {
+      if (err && err.status === 401 && !/\/login\.html$/i.test(page)) { location.replace(routes.login); return; }
       notify(err.message || "Mail service unavailable", true);
     }
   }
