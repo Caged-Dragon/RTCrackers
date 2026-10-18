@@ -28,6 +28,7 @@ body{font-family:Inter,system-ui,sans-serif;background:#f8f9ff;color:#0b1c30;min
  const form=document.getElementById('mail-login-form');
  const status=document.getElementById('mail-login-status');
  const submit=document.getElementById('mail-login-submit');
+ fetch('/api/v1/admin/auth/me',{credentials:'include',headers:{Accept:'application/json'}}).then(response=>{if(response.ok)location.replace('/FRONTEND/EMAIL/PAGES/inbox.html')}).catch(()=>{});
  form.addEventListener('submit',async event=>{
    event.preventDefault();submit.disabled=true;status.textContent='Authenticating…';status.style.color='#64748b';
    try{
