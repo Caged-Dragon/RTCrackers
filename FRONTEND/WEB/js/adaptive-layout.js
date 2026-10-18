@@ -179,6 +179,8 @@
     // content rather than shrinking the content into an unusable column.
     const stacked = available < (minContent + 96);
     layout.classList.toggle('rt-admin-stacked', stacked);
+    // In stacked mode CSS uses single-column layout and scrollable nav rails.
+    // Clear absolute drawer positioning only after the stack class is active.
     if (stacked) layout.classList.remove('rt-admin-drawer-overlay');
   }
 
