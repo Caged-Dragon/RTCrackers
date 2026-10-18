@@ -1,0 +1,30 @@
+name: Export RTCrackers admin platform codebase
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [MASTER]
+
+permissions:
+  contents: read
+
+jobs:
+  export-source:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out exact committed source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Build complete source archive
+        run: |
+          git archive --format=zip --prefix=RTCrackers-Admin-Platform/ HEAD -o RTCrackers-Admin-Platform-MASTER.zip
+          test -s RTCrackers-Admin-Platform-MASTER.zip
+          unzip -t RTCrackers-Admin-Platform-MASTER.zip
+      - name: Publish downloadable codebase
+        uses: actions/upload-artifact@v4
+        with:
+          name: RTCrackers-Admin-Platform-MASTER
+          path: RTCrackers-Admin-Platform-MASTER.zip
+          if-no-files-found: error
+          retention-days: 30
