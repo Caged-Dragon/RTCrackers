@@ -30,6 +30,7 @@ body{font-family:Inter,system-ui,sans-serif}.login-shell{width:min(calc(100% - 2
  const form=document.getElementById('admin-login-form');
  const status=document.getElementById('admin-login-status');
  const button=document.getElementById('admin-login-submit');
+ fetch('/api/v1/admin/auth/me',{credentials:'include',headers:{Accept:'application/json'}}).then(response=>{if(response.ok)location.replace(new URL('../primary_admin_complete_command_center_rtcrackers/code.html',location.href).href)}).catch(()=>{});
  form.addEventListener('submit', async event => {
    event.preventDefault();
    status.textContent='Authenticating…';
