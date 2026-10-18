@@ -48,16 +48,16 @@ table {
   max-width: 100%;
   border-collapse: collapse;
 }
-table:has(th), table:has(td) {
-  display: block;
-  overflow-x: auto;
-  overscroll-behavior-inline: contain;
-}
 .rtc-mail-live-badge, .rtc-mail-api-error {
   max-width: calc(100vw - 24px);
   overflow-wrap: anywhere;
 }
 @media (max-width: 640px) {
+  table:has(th), table:has(td) {
+    display: block;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+  }
   body > main, body > div > main, main {
     max-width: 100%;
     min-width: 0;
