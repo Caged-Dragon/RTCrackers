@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from typing import Literal
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, Path, Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from pydantic import BaseModel, EmailStr, Field
 
 from core.config import settings
@@ -455,3 +455,202 @@ async def restore_message(email_id: int = Path(ge=1), admin=Depends(require_perm
     return await _set_message_flag(email_id, {"folder": folder, "deleted_at": None})
     if folder != "trash":
         params["deleted_at"] = "is.null"
+
+
+def _verify_resend_signature(raw: bytes, webhook_id: str, timestamp: str, signature: str) -> bool:
+    import base64
+    import hashlib
+    import hmac
+    import time
+
+    secret = settings.RESEND_WEBHOOK_SECRET
+    if not secret or not webhook_id or not timestamp or not signature:
+        return False
+    try:
+        sent_at = int(timestamp)
+    except (TypeError, ValueError):
+        return False
+    if abs(time.time() - sent_at) > 300:
+        return False
+    signing_secret = secret.removeprefix("whsec_")
+    try:
+        key = base64.b64decode(signing_secret + "=" * (-len(signing_secret) % 4))
+    except (ValueError, TypeError):
+        return False
+    signed = webhook_id.encode() + b"." + timestamp.encode() + b"." + raw
+    expected = base64.b64encode(hmac.new(key, signed, hashlib.sha256).digest()).decode()
+    candidates = []
+    for part in signature.split():
+        if "," not in part:
+            continue
+        version, _, value = part.partition(",")
+        if version == "v1":
+            candidates.append(value)
+    return any(hmac.compare_digest(expected, candidate) for candidate in candidates)
+
+
+@router.post("/webhook/resend")
+async def resend_webhook(request: __import__("fastapi").Request):
+    """Receive verified Resend delivery and inbound-email events. Configure this URL in Resend."""
+    import json
+    from email.utils import parseaddr
+
+    raw = await request.body()
+    webhook_id = request.headers.get("svix-id", "")
+    timestamp = request.headers.get("svix-timestamp", "")
+    signature = request.headers.get("svix-signature", "")
+    if not _verify_resend_signature(raw, webhook_id, timestamp, signature):
+        raise HTTPException(status_code=400, detail="Invalid or expired mail webhook signature")
+    try:
+        event = json.loads(raw)
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=400, detail="Invalid webhook JSON") from exc
+    if not isinstance(event, dict) or not isinstance(event.get("data"), dict):
+        raise HTTPException(status_code=400, detail="Invalid webhook event")
+
+    # Idempotency: Resend/Svix reuses a webhook ID on retries.
+    duplicate = await _supa(
+        "GET", "email_messages",
+        params={"select": "email_message_id", "resend_event_id": f"eq.{webhook_id}", "limit": "1"},
+    )
+    if duplicate:
+        return {"ok": True, "duplicate": True}
+
+    event_type = str(event.get("type") or "")
+    data = event["data"]
+    email_id = str(data.get("email_id") or data.get("id") or "")
+    if event_type in {"email.delivered", "email.bounced", "email.complained", "email.failed", "email.sent"}:
+        if not email_id:
+            return {"ok": True, "ignored": True}
+        status_by_type = {
+            "email.delivered": "delivered",
+            "email.bounced": "bounced",
+            "email.complained": "complained",
+            "email.failed": "failed",
+            "email.sent": "sent",
+        }
+        await _supa(
+            "PATCH", "email_messages",
+            params={"resend_email_id": f"eq.{email_id}"},
+            payload={
+                "status": status_by_type[event_type],
+                "resend_event_id": webhook_id,
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+            },
+            prefer="return=minimal",
+        )
+        return {"ok": True}
+
+    if event_type != "email.received":
+        return {"ok": True, "ignored": True}
+    if not email_id:
+        raise HTTPException(status_code=422, detail="Inbound event has no email ID")
+    if not settings.RESEND_API_KEY:
+        raise HTTPException(status_code=503, detail="Inbound mail provider is not configured")
+
+    # Resend's event gives recipient and message metadata. Retrieve the full
+    # body from the receiving API; no body is trusted from a browser request.
+    try:
+        async with httpx.AsyncClient(timeout=18.0) as client:
+            received_response = await client.get(
+                "https://api.resend.com/emails/receiving/" + email_id,
+                headers={"Authorization": f"Bearer {settings.RESEND_API_KEY}", "Accept": "application/json"},
+            )
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=503, detail="Could not retrieve the received email") from exc
+    if not received_response.is_success:
+        raise HTTPException(status_code=502, detail="The inbound email body could not be retrieved")
+    try:
+        received_payload = received_response.json()
+    except ValueError as exc:
+        raise HTTPException(status_code=502, detail="Invalid inbound email response") from exc
+    received = received_payload.get("data", received_payload) if isinstance(received_payload, dict) else {}
+    recipients = data.get("to") or received.get("to") or []
+    if isinstance(recipients, str):
+        recipients = [recipients]
+    mailboxes = []
+    for recipient in recipients:
+        address = parseaddr(str(recipient))[1].lower().strip()
+        if not address:
+            continue
+        matches = await _supa(
+            "GET", "mailboxes",
+            params={
+                "select": "mailbox_id,email_address,display_name,is_active,is_receiving_enabled",
+                "email_address": f"eq.{address}",
+                "is_active": "eq.true",
+                "is_receiving_enabled": "eq.true",
+                "limit": "1",
+            },
+        )
+        if matches:
+            mailboxes.append((matches[0], address))
+    if not mailboxes:
+        # An unprovisioned recipient should not cause endless provider retries.
+        return {"ok": True, "ignored": True, "reason": "No active receiving mailbox matched the recipient"}
+
+    mailbox = mailboxes[0][0]
+    from_raw = str(received.get("from") or data.get("from") or "")
+    from_name, from_address = parseaddr(from_raw)
+    from_address = (from_address or from_raw).lower()[:254]
+    subject = str(received.get("subject") or data.get("subject") or "(no subject)")[:998]
+    body_text = received.get("text") or received.get("text_body")
+    body_html = received.get("html") or received.get("html_body")
+    body_text = str(body_text)[:1_000_000] if body_text is not None else None
+    body_html = str(body_html)[:1_000_000] if body_html is not None else None
+    snippet_source = body_text or re.sub(r"<[^>]+>", " ", body_html or "")
+    snippet = re.sub(r"\\s+", " ", snippet_source).strip()[:180]
+    message_id = str(received.get("message_id") or data.get("message_id") or "")[:998] or None
+    existing = await _supa(
+        "GET", "email_messages",
+        params={"select": "email_message_id", "message_id": f"eq.{message_id}", "mailbox_id": f"eq.{mailbox['mailbox_id']}", "limit": "1"},
+    ) if message_id else []
+    if existing:
+        await _supa(
+            "PATCH", "email_messages",
+            params={"email_message_id": f"eq.{existing[0]['email_message_id']}"},
+            payload={"resend_event_id": webhook_id, "resend_email_id": email_id, "updated_at": datetime.now(timezone.utc).isoformat()},
+            prefer="return=minimal",
+        )
+        return {"ok": True, "duplicate": True}
+
+    created = await _supa(
+        "POST", "email_messages",
+        payload={
+            "mailbox_id": mailbox["mailbox_id"],
+            "direction": "inbound",
+            "status": "received",
+            "folder": "inbox",
+            "message_id": message_id,
+            "from_address": from_address,
+            "from_name": from_name or None,
+            "subject": subject,
+            "text_body": body_text,
+            "html_body": body_html,
+            "is_read": False,
+            "is_starred": False,
+            "is_important": False,
+            "snippet": snippet,
+            "received_at": received.get("created_at") or data.get("created_at") or datetime.now(timezone.utc).isoformat(),
+            "resend_email_id": email_id,
+            "resend_event_id": webhook_id,
+            "in_reply_to": received.get("in_reply_to"),
+            "references_header": received.get("references"),
+        },
+        prefer="return=representation",
+    )
+    if not created:
+        raise HTTPException(status_code=502, detail="Could not save the received email")
+    row_id = int(created[0]["email_message_id"])
+    recipient_rows = []
+    for kind in ("to", "cc", "bcc"):
+        addresses = received.get(kind) or data.get(kind) or []
+        if isinstance(addresses, str):
+            addresses = [addresses]
+        for address in addresses:
+            recipient = parseaddr(str(address))[1].lower().strip()
+            if recipient:
+                recipient_rows.append({"email_message_id": row_id, "recipient_type": kind, "email_address": recipient})
+    if recipient_rows:
+        await _supa("POST", "email_recipients", payload=recipient_rows, prefer="return=minimal")
+    return {"ok": True, "email_message_id": row_id}
