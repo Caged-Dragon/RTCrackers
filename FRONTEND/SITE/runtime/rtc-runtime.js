@@ -249,7 +249,7 @@
     try {
       // Use a read-only, permission-checked endpoint to validate the HttpOnly
       // admin session. Tokens are never copied to local/session storage.
-      await adminApi('/products?page=1&page_size=1');
+      await adminApi('/auth/me');
     } catch (error) {
       if (error && error.status === 401) {
         location.replace(new URL('../admin_login_rtcrackers/code.html', location.href).href);
