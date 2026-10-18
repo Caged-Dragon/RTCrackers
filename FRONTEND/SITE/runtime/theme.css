@@ -37,3 +37,94 @@ html.dark .text-secondary { color:#ffce4b !important; }
 html.dark .bg-secondary { background:#ffce4b !important; }
 html.dark .rtc-theme-bar { background:#111418; color:#f8f9ff; border-color:#32373e; }
 @media (max-width:640px){ .rtc-home-banner{border-radius:0 0 10px 10px}.rtc-theme-bar{right:8px;bottom:8px}.rtc-sync-badge{left:8px;bottom:8px} }
+
+
+/* Responsive baseline for the active FRONTEND/SITE runtime.
+   All values are calculated in the browser; nothing here writes display state to APIs. */
+:root {
+  --rtc-page-gutter: clamp(0.75rem, 2.5vw, 2rem);
+  --rtc-content-gap: clamp(0.5rem, 1.5vw, 1.25rem);
+}
+html {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+}
+body {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
+  overflow-wrap: anywhere;
+}
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+main, section, article, aside, header, footer, nav, form,
+.grid, .flex, .flex-1, [class*="max-w-"] {
+  min-width: 0;
+}
+img, video, canvas, iframe, svg {
+  max-inline-size: 100%;
+}
+button, input, select, textarea {
+  max-inline-size: 100%;
+  min-width: 0;
+  font: inherit;
+  touch-action: manipulation;
+}
+textarea, input, select {
+  overflow-wrap: anywhere;
+}
+pre, code {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+pre {
+  white-space: pre-wrap;
+}
+table {
+  max-width: 100%;
+}
+.overflow-x-auto, [class~="overflow-x-auto"], .table-responsive {
+  max-width: 100%;
+  overscroll-behavior-inline: contain;
+}
+.rtc-home-banner {
+  width: min(100%, 1600px);
+}
+.rtc-theme-bar {
+  max-width: calc(100vw - 16px);
+}
+.rtc-sync-badge {
+  max-width: calc(100vw - 16px);
+}
+@media (max-width: 640px) {
+  /* Fixed, unprefixed desktop grids collapse by content width on phones. */
+  .grid.grid-cols-2, .grid.grid-cols-3, .grid.grid-cols-4, .grid.grid-cols-5, .grid.grid-cols-6 {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .grid.grid-cols-2.md\:grid-cols-2, .grid.grid-cols-3.md\:grid-cols-2,
+  .grid.grid-cols-4.md\:grid-cols-2 {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  [class~="w-64"] { width: min(16rem, 88vw) !important; }
+  [class~="w-72"] { width: min(18rem, 88vw) !important; }
+  [class~="w-screen"] { width: 100% !important; }
+  [class~="max-w-screen-xl"], [class~="max-w-screen-2xl"] { max-width: 100% !important; }
+  .rtc-home-banner { border-radius: 0 0 10px 10px; }
+  .rtc-theme-bar { right: 8px; bottom: 8px; gap: 4px; padding: 5px; }
+  .rtc-theme-bar button { padding: 7px 9px; }
+  .rtc-sync-badge { left: 8px; bottom: 8px; }
+  table { display: block; width: max-content; max-width: 100%; overflow-x: auto; }
+}
+@media (max-width: 380px) {
+  .rtc-theme-bar { right: 5px; bottom: 5px; }
+  .rtc-theme-bar button { font-size: 10px; padding-inline: 7px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
