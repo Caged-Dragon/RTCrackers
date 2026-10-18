@@ -319,7 +319,6 @@
     wirePaths();
     try {
       await ensureMailbox();
-      await hydrateInbox();
       await hydrateLiveFolder();
       await hydrateMessage();
       await hydrateCompose();
