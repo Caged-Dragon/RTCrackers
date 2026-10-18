@@ -38,6 +38,54 @@
     setTimeout(() => el.remove(), error ? 6000 : 2400);
   }
 
+  async function hydrateMailTheme() {
+    try {
+      const themePage = /login/i.test(page) ? 'login' : 'inbox';
+      const response = await fetch('/api/v1/cms/theme/mail/' + themePage, {credentials:'omit', headers:{Accept:'application/json'}});
+      if (!response.ok) return;
+      const data = await response.json();
+      const theme = data && data.page;
+      if (!theme) return;
+      const root = document.documentElement;
+      const vars = {
+        '--rtc-mail-bg': theme.background_color,
+        '--rtc-mail-surface': theme.surface_color,
+        '--rtc-mail-section': theme.section_color,
+        '--rtc-mail-header': theme.header_color,
+        '--rtc-mail-footer': theme.footer_color,
+        '--rtc-mail-text': theme.text_color,
+        '--rtc-mail-muted': theme.muted_text_color,
+        '--rtc-mail-heading': theme.heading_color,
+        '--rtc-mail-primary': theme.primary_color,
+        '--rtc-mail-primary-dark': theme.primary_dark_color,
+        '--rtc-mail-secondary': theme.secondary_color,
+        '--rtc-mail-accent': theme.accent_color,
+        '--rtc-mail-border': theme.border_color,
+        '--rtc-mail-font-heading': theme.font_heading,
+        '--rtc-mail-font-body': theme.font_body,
+        '--rtc-mail-radius': theme.radius_medium
+      };
+      Object.entries(vars).forEach(([key, value]) => {
+        if (typeof value === 'string' && value.length < 160 && !/[{};]/.test(value)) root.style.setProperty(key, value);
+      });
+      root.dataset.dbMailTheme = themePage;
+      for (const component of Array.isArray(data.components) ? data.components : []) {
+        const key = String(component.component_key || '');
+        if (!/^[a-z0-9_-]{1,100}$/i.test(key)) continue;
+        document.querySelectorAll('[data-theme-component="' + key + '"]').forEach(el => {
+          if (component.content_value) el.textContent = String(component.content_value);
+          if (component.text_color) el.style.color = String(component.text_color);
+          if (component.background_color) el.style.backgroundColor = String(component.background_color);
+          if (component.border_color) el.style.borderColor = String(component.border_color);
+          if (component.padding) el.style.padding = String(component.padding);
+          if (component.border_radius) el.style.borderRadius = String(component.border_radius);
+        });
+      }
+    } catch (error) {
+      console.warn('Database mail theme unavailable', error);
+    }
+  }
+
   function localizeAssets() {
     document.querySelectorAll("img[src*='googleusercontent.com/aida']").forEach(img => {
       img.src = cfg.logo || "/ASSETS/LOGO.jpeg";
@@ -267,6 +315,7 @@
 
   async function boot() {
     localizeAssets();
+    hydrateMailTheme();
     wirePaths();
     try {
       await ensureMailbox();
