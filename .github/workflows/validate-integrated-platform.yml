@@ -1,0 +1,58 @@
+name: Validate integrated RTCrackers platform
+
+on:
+  pull_request:
+    branches: [MASTER, main]
+  push:
+    branches: [MASTER, main]
+
+permissions:
+  contents: read
+
+jobs:
+  source-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Compile changed Python integration modules
+        run: |
+          python -m py_compile \
+            BACKEND/CUSTOMER/main.py \
+            BACKEND/CUSTOMER/customers/combos/routes.py \
+            BACKEND/CUSTOMER/customers/cms/routes.py \
+            BACKEND/ADMIN/main.py \
+            BACKEND/ADMIN/ADMINS/combos/routes.py \
+            BACKEND/ADMIN/ADMINS/mail/routes.py \
+            BACKEND/ADMIN/ADMINS/cms/routes.py \
+            BACKEND/ADMIN/ADMINS/auth/routes.py \
+            BACKEND/ADMIN/core/config.py \
+            BACKEND/CUSTOMER/core/config.py \
+            BACKEND/ADMIN/tests/test_combos.py
+      - name: Check active frontend and mail JavaScript
+        run: |
+          node --check FRONTEND/SITE/runtime/rtc-runtime.js
+          node --check FRONTEND/SITE/runtime/combo-manager.js
+          node --check FRONTEND/WEB/js/database-theme.js
+          node --check FRONTEND/EMAIL/email-api.js
+          node --check FRONTEND/EMAIL/email-runtime.js
+      - name: Verify security-critical source invariants
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          migration = Path("supabase/migrations/20261018042121_server_authorized_combo_admin_api.sql").read_text()
+          admin_api = Path("BACKEND/ADMIN/ADMINS/combos/routes.py").read_text()
+          assert "Server-side service authorization required" in migration
+          assert "FROM PUBLIC, anon, authenticated" in migration
+          assert "TO service_role" in migration
+          assert "SUPABASE_SERVICE_ROLE_KEY" in admin_api
+          assert "Content-Type" in admin_api
+          assert "localStorage" not in Path("FRONTEND/SITE/runtime/combo-manager.js").read_text()
+          assert 'initial-scale=1.0, viewport-fit=cover' in Path("FRONTEND/EMAIL/email-runtime.js").read_text()
+          print("Source security invariants passed")
+          PY
