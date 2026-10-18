@@ -29,6 +29,7 @@
   }, window.RT_CONFIG || {});
   const currentDir = location.pathname.replace(/\\/g,'/');
   const shellType = document.querySelector('meta[name="shell-type"]')?.content || '';
+  const isAdminLogin = /admin_login_rtcrackers/i.test(currentDir) || /admin login/i.test(document.title);
   const isAdmin = /(^|\/)admin([\/?]|$)/i.test(currentDir)
     || /(^|\/)(?:primary_admin_|admin_page_|admin_content_manager)/i.test(currentDir)
     || /admin|command center|control center/i.test(document.title)
@@ -243,10 +244,29 @@
   function patchLocalLinks(){
     document.querySelectorAll('a[href="#"]').forEach(a=>{const t=(a.textContent||'').trim(); if(/order now|whatsapp business/i.test(t)) a.href='https://wa.me/'+cfg.whatsapp;});
   }
+  async function guardAdminSession() {
+    if (!isAdmin || isAdminLogin) return;
+    try {
+      // Use a read-only, permission-checked endpoint to validate the HttpOnly
+      // admin session. Tokens are never copied to local/session storage.
+      await adminApi('/products?page=1&page_size=1');
+    } catch (error) {
+      if (error && error.status === 401) {
+        location.replace(new URL('../admin_login_rtcrackers/code.html', location.href).href);
+        return;
+      }
+      if (error && error.status === 403) {
+        document.body.innerHTML = '<main style="max-width:620px;margin:12vh auto;padding:24px;font:16px/1.5 system-ui;color:#10224b"><h1>Admin permission required</h1><p>This account does not have permission to access the admin workspace.</p><a href="../admin_login_rtcrackers/code.html">Sign in with another administrator account</a></main>';
+        return;
+      }
+      notify('Admin API is temporarily unavailable. Reload after the service recovers.', 'error');
+    }
+  }
   function boot(){
     addThemeBar(); setLogo(); wireNavigation(); wireWhatsApp(); patchLocalLinks(); injectHomeBanner(); sanitizeCustomerContent(); addSyncBadge();
     refreshCartBadge(); hydrateCms(); bindLogin(); bindRegistration(); bindAddToCart(); hydrateCatalog(); hydrateProduct(); hydrateCart(); hydrateCheckout(); adminContentEditor();
-    window.RTApi={customerApi,adminApi,platformApi,notify,pageUrl,money,escapeHtml,escapeAttr,isAdmin,config:cfg};
+    window.RTApi={customerApi,adminApi,platformApi,notify,pageUrl,money,escapeHtml,escapeAttr,isAdmin,isAdminLogin,config:cfg};
+    guardAdminSession();
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
 })();
