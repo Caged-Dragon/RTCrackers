@@ -1,4 +1,16 @@
 (() => {
+  // Browser zoom and pinch-zoom are per-visitor UI preferences. Keep them
+  // available and never persist viewport scale or section dimensions.
+  const viewportMeta = document.querySelector('meta[name="viewport"]');
+  if (viewportMeta) {
+    viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0, viewport-fit=cover');
+  } else {
+    const meta = document.createElement('meta');
+    meta.name = 'viewport';
+    meta.content = 'width=device-width, initial-scale=1.0, viewport-fit=cover';
+    document.head.appendChild(meta);
+  }
+
   const cfg = window.RTC_MAIL_CONFIG || {};
   const api = window.RTCMailAPI;
   const page = location.pathname.toLowerCase();
