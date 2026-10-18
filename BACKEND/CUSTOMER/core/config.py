@@ -72,6 +72,7 @@ class Settings(BaseSettings):
     # ------------------------------------------------------- Supabase storage
     STORAGE_BACKEND: Literal["local", "supabase"] = "local"
     SUPABASE_URL: str | None = None
+    SUPABASE_PUBLISHABLE_KEY: str | None = None
     SUPABASE_SERVICE_ROLE_KEY: str | None = None
     SUPABASE_STORAGE_BUCKET: str = "rtcrackers-media"
     LOCAL_MEDIA_DIR: str = "media"

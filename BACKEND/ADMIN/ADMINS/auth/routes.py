@@ -29,6 +29,12 @@ def _clear_auth_cookies(response: Response):
     response.delete_cookie('rtc_admin_access_token', domain=settings.AUTH_COOKIE_DOMAIN, path='/')
     response.delete_cookie('rtc_admin_refresh_token', domain=settings.AUTH_COOKIE_DOMAIN, path='/')
 
+@router.get('/me')
+async def me(admin=Depends(get_current_admin)):
+    """Validate the current administrator session without granting data permissions."""
+    user = getattr(admin, "admin", None)
+    return {"admin_id": admin.admin_id, "user_id": str(admin.user_id), "authenticated": True}
+
 @router.post('/login', response_model=TokenPair)
 async def login(p: LoginRequest, response: Response, request: Request, db: AsyncSession = Depends(get_db)):
     access, refresh_token, expires_at = await AuthService(db).login(

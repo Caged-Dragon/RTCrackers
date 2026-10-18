@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow"><title>RTC Crackers Mail · Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/FRONTEND/EMAIL/email-runtime.css">
+<style>
+body{font-family:Inter,system-ui,sans-serif;background:#f8f9ff;color:#0b1c30;min-height:100vh;display:grid;place-items:center;padding:1rem}.mail-login{width:min(100%,430px);background:white;border:1px solid #e2e8f0;border-radius:1.25rem;padding:clamp(1.25rem,5vw,2.25rem);box-shadow:0 22px 55px rgba(15,23,42,.1)}.mail-input{display:block;width:100%;margin-top:.4rem;padding:.85rem .9rem;border:1px solid #cbd5e1;border-radius:.65rem;font:inherit;min-width:0}.mail-submit{width:100%;padding:.9rem 1rem;margin-top:1.25rem;background:#a33900;color:white;font-weight:800;border-radius:.65rem}.mail-submit:disabled{opacity:.6}.mail-logo{color:#a33900;font-weight:800;letter-spacing:.02em}
+</style>
+</head>
+<body>
+<main class="mail-login">
+  <div class="mail-logo">RT CRACKERS</div>
+  <p class="mt-2 text-xs uppercase tracking-widest font-bold" style="color:#64748b">Mail administration</p>
+  <h1 class="mt-2 text-2xl font-extrabold">Sign in to your mailbox</h1>
+  <p class="mt-2 text-sm leading-relaxed" style="color:#64748b">Use your registered administrator credentials. The session is held in secure HTTP-only cookies.</p>
+  <form id="mail-login-form" class="mt-6">
+    <label for="mail-login-email" class="block text-sm font-bold">Email address<input id="mail-login-email" class="mail-input" type="email" autocomplete="username" required maxlength="254"></label>
+    <label for="mail-login-password" class="block text-sm font-bold mt-4">Password<input id="mail-login-password" class="mail-input" type="password" autocomplete="current-password" required maxlength="200"></label>
+    <button id="mail-login-submit" class="mail-submit" type="submit">Sign in securely</button>
+    <p id="mail-login-status" class="mt-4 text-sm" role="status" aria-live="polite"></p>
+  </form>
+  <a href="/admin" class="inline-block mt-4 text-sm underline" style="color:#a33900">Admin workspace</a>
+</main>
+<script>
+(() => {
+ const form=document.getElementById('mail-login-form');
+ const status=document.getElementById('mail-login-status');
+ const submit=document.getElementById('mail-login-submit');
+ fetch('/api/v1/admin/auth/me',{credentials:'include',headers:{Accept:'application/json'}}).then(response=>{if(response.ok)location.replace('/FRONTEND/EMAIL/PAGES/inbox.html')}).catch(()=>{});
+ form.addEventListener('submit',async event=>{
+   event.preventDefault();submit.disabled=true;status.textContent='Authenticating…';status.style.color='#64748b';
+   try{
+     const response=await fetch('/api/v1/admin/auth/login',{method:'POST',credentials:'include',headers:{Accept:'application/json','Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('mail-login-email').value.trim(),password:document.getElementById('mail-login-password').value})});
+     const data=await response.json().catch(()=>({}));
+     if(!response.ok)throw new Error(data.detail||data.message||'Unable to sign in with these credentials.');
+     // Access and refresh tokens are not stored in localStorage/sessionStorage.
+     location.replace('/FRONTEND/EMAIL/PAGES/inbox.html');
+   }catch(error){status.textContent=error.message||'Mail sign-in failed.';status.style.color='#b42318';}
+   finally{submit.disabled=false;}
+ });
+})();
+</script>
+</body></html>

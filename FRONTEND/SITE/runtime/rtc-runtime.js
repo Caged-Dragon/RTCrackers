@@ -28,7 +28,12 @@
     productImage: '../assets/branding/electric-sparklers-10cm.jpeg'
   }, window.RT_CONFIG || {});
   const currentDir = location.pathname.replace(/\\/g,'/');
-  const isAdmin = /(^|\/)admin([\/?]|$)/i.test(currentDir) || /admin_/i.test(document.title);
+  const shellType = document.querySelector('meta[name="shell-type"]')?.content || '';
+  const isAdminLogin = /admin_login_rtcrackers/i.test(currentDir) || /admin login/i.test(document.title);
+  const isAdmin = /(^|\/)admin([\/?]|$)/i.test(currentDir)
+    || /(^|\/)(?:primary_admin_|admin_page_|admin_content_manager)/i.test(currentDir)
+    || /admin|command center|control center/i.test(document.title)
+    || /admin|dashboard/i.test(shellType);
   const store = {
     get theme(){ return localStorage.getItem('rtc-theme') || 'light'; },
     set theme(v){ localStorage.setItem('rtc-theme',v); }
@@ -49,9 +54,9 @@
       if(img.alt === 'LOGO.jpeg' || /aida\/AEt|aida-public/.test(img.src)) img.src=cfg.logo;
     });
   }
-  const routeFiles = {"/":"customer_page_1_home_storefront_rtcrackers/code.html","/shop":"shop_all_products_red_thunder_crackers/code.html","/categories":"categories_red_thunder_crackers/code.html","/offers":"offers_deals_red_thunder_crackers/code.html","/product":"customer_page_3_product_details_red_thunder_crackers/code.html","/cart":"customer_page_4_shopping_cart_red_thunder_crackers/code.html","/checkout":"customer_page_5_checkout_red_thunder_crackers/code.html","/order-confirmation":"customer_page_6_order_confirmation_receipt_rtcrackers/code.html","/login":"customer_page_7_login_sign_in_red_thunder_crackers/code.html","/signup":"customer_registration_rtcrackers/code.html","/forgot-password":"forgot_reset_password_rtcrackers/code.html","/account":"my_account_dashboard_rtcrackers/code.html","/account/orders":"page_16_my_orders_rtcrackers/code.html","/account/orders/tracking":"order_details_tracking_rtcrackers/code.html","/account/wishlist":"my_wishlist_saved_gear_rtcrackers/code.html","/account/addresses":"page_24_saved_addresses_rtcrackers/code.html","/account/payments":"page_26_saved_payments_rtcrackers/code.html","/account/profile":"page_25_profile_personal_information_rtcrackers/code.html","/account/notifications":"page_27_notifications_preferences_rtcrackers/code.html","/account/settings":"page_28_account_settings_privacy_rtcrackers/code.html","/support":"page_29_help_support_center_rtcrackers/code.html","/faq":"page_20_faq_help_center_rtcrackers/code.html","/contact":"page_19_contact_us_rtcrackers/code.html","/about":"page_31_about_us_our_story_rtcrackers/code.html","/shipping":"page_32_shipping_delivery_information_rtcrackers/code.html","/privacy-policy":"customer_page_26_privacy_policy_rtcrackers/code.html","/terms-and-conditions":"customer_page_27_terms_conditions_red_thunder_crackers/code.html","/404":"customer_page_28_404_error_recovery_rtcrackers/code.html","/maintenance":"customer_page_29_maintenance_offline_experience_rtcrackers/code.html","/admin":"primary_admin_complete_command_center_rtcrackers/code.html","/admin/content":"admin_content_manager_rtcrackers/code.html","/admin/products":"admin_page_2_product_management_rtcrackers/code.html","/admin/categories":"page_3_category_management_rtcrackers_admin/code.html","/admin/inventory":"admin_page_17_inventory_management_stock_control_rtcrackers/code.html","/admin/orders":"admin_page_7_order_management_rtcrackers/code.html","/admin/orders/pending":"admin_page_8_pending_orders_processing_queue_rtcrackers/code.html","/admin/orders/processing":"admin_page_9_processing_orders_rtcrackers/code.html","/admin/orders/shipped":"admin_page_10_shipped_orders_tracking_rtcrackers/code.html","/admin/orders/delivered":"admin_page_11_delivered_orders_delivery_history_rtcrackers/code.html","/admin/orders/cancelled":"admin_page_12_cancelled_orders_cancellation_management_rtcrackers/code.html","/admin/customers":"admin_page_18_customer_management_customer_details_rtcrackers/code.html","/admin/support":"admin_page_19_customer_support_tickets_conversations_management_rtcrackers/code.html","/admin/coupons":"admin_page_20_coupons_discounts_promotional_campaign_management_rtcrackers/code.html","/admin/pricing":"admin_page_21_product_pricing_price_rules_dynamic_pricing_management_rtcrackers/code.html","/admin/reports":"admin_page_22_reports_analytics_business_intelligence_dashboard_rtcrackers/code.html","/admin/settings":"admin_page_23_settings_configuration_system_administration_rtcrackers/code.html","/admin/profile":"admin_page_24_admin_profile_account_security_personal_preferences_rtcrackers/code.html","/search":"customer_page_2_product_listing_category_search_red_thunder_crackers/code.html","/admin/payments":"admin_page_15_payments_transaction_management_rtcrackers/code.html","/admin/shipping":"admin_page_16_shipping_delivery_management_rtcrackers/code.html","/admin/reviews":"admin_page_6_product_reviews_ratings_management_rtcrackers/code.html","/admin/inventory/legacy":"admin_page_5_inventory_management_rtcrackers/code.html"};
+  const routeFiles = {"/":"customer_page_1_home_storefront_rtcrackers/code.html","/combos":"combo_packs_red_thunder_crackers/code.html","/shop":"shop_all_products_red_thunder_crackers/code.html","/categories":"categories_red_thunder_crackers/code.html","/offers":"offers_deals_red_thunder_crackers/code.html","/product":"customer_page_3_product_details_red_thunder_crackers/code.html","/cart":"customer_page_4_shopping_cart_red_thunder_crackers/code.html","/checkout":"customer_page_5_checkout_red_thunder_crackers/code.html","/order-confirmation":"customer_page_6_order_confirmation_receipt_rtcrackers/code.html","/login":"customer_page_7_login_sign_in_red_thunder_crackers/code.html","/signup":"customer_registration_rtcrackers/code.html","/forgot-password":"forgot_reset_password_rtcrackers/code.html","/account":"my_account_dashboard_rtcrackers/code.html","/account/orders":"page_16_my_orders_rtcrackers/code.html","/account/orders/tracking":"order_details_tracking_rtcrackers/code.html","/account/wishlist":"my_wishlist_saved_gear_rtcrackers/code.html","/account/addresses":"page_24_saved_addresses_rtcrackers/code.html","/account/payments":"page_26_saved_payments_rtcrackers/code.html","/account/profile":"page_25_profile_personal_information_rtcrackers/code.html","/account/notifications":"page_27_notifications_preferences_rtcrackers/code.html","/account/settings":"page_28_account_settings_privacy_rtcrackers/code.html","/support":"page_29_help_support_center_rtcrackers/code.html","/faq":"page_20_faq_help_center_rtcrackers/code.html","/contact":"page_19_contact_us_rtcrackers/code.html","/about":"page_31_about_us_our_story_rtcrackers/code.html","/shipping":"page_32_shipping_delivery_information_rtcrackers/code.html","/privacy-policy":"customer_page_26_privacy_policy_rtcrackers/code.html","/terms-and-conditions":"customer_page_27_terms_conditions_red_thunder_crackers/code.html","/404":"customer_page_28_404_error_recovery_rtcrackers/code.html","/maintenance":"customer_page_29_maintenance_offline_experience_rtcrackers/code.html","/admin":"admin_login_rtcrackers/code.html","/admin/content":"admin_content_manager_rtcrackers/code.html","/admin/products":"admin_page_2_product_management_rtcrackers/code.html","/admin/categories":"page_3_category_management_rtcrackers_admin/code.html","/admin/inventory":"admin_page_17_inventory_management_stock_control_rtcrackers/code.html","/admin/orders":"admin_page_7_order_management_rtcrackers/code.html","/admin/orders/pending":"admin_page_8_pending_orders_processing_queue_rtcrackers/code.html","/admin/orders/processing":"admin_page_9_processing_orders_rtcrackers/code.html","/admin/orders/shipped":"admin_page_10_shipped_orders_tracking_rtcrackers/code.html","/admin/orders/delivered":"admin_page_11_delivered_orders_delivery_history_rtcrackers/code.html","/admin/orders/cancelled":"admin_page_12_cancelled_orders_cancellation_management_rtcrackers/code.html","/admin/customers":"admin_page_18_customer_management_customer_details_rtcrackers/code.html","/admin/support":"admin_page_19_customer_support_tickets_conversations_management_rtcrackers/code.html","/admin/coupons":"admin_page_20_coupons_discounts_promotional_campaign_management_rtcrackers/code.html","/admin/pricing":"admin_page_21_product_pricing_price_rules_dynamic_pricing_management_rtcrackers/code.html","/admin/reports":"admin_page_22_reports_analytics_business_intelligence_dashboard_rtcrackers/code.html","/admin/settings":"admin_page_23_settings_configuration_system_administration_rtcrackers/code.html","/admin/profile":"admin_page_24_admin_profile_account_security_personal_preferences_rtcrackers/code.html","/search":"customer_page_2_product_listing_category_search_red_thunder_crackers/code.html","/admin/payments":"admin_page_15_payments_transaction_management_rtcrackers/code.html","/admin/shipping":"admin_page_16_shipping_delivery_management_rtcrackers/code.html","/admin/reviews":"admin_page_6_product_reviews_ratings_management_rtcrackers/code.html","/admin/inventory/legacy":"admin_page_5_inventory_management_rtcrackers/code.html"};
   const routes = {
-    home:'/', shop:'/shop', products:'/shop', search:'/search', categories:'/categories', offers:'/offers', 'offers-deals':'/offers',
+    home:'/', shop:'/shop', products:'/shop', search:'/search', categories:'/categories', offers:'/offers', 'offers-deals':'/offers', combos:'/combos', 'combo-packs':'/combos',
     'about-us':'/about', about:'/about', contact:'/contact', 'contact-us':'/contact', faq:'/faq', faqs:'/faq',
     'shipping-policy':'/shipping', 'shipping-information':'/shipping', 'shipping-info':'/shipping', 'shipping-delivery':'/shipping',
     'privacy-policy':'/privacy-policy', 'terms-conditions':'/terms-and-conditions', 'terms-and-conditions':'/terms-and-conditions',
@@ -87,10 +92,19 @@
       if(guess) a.href=guess;
     });
   }
-  async function api(base, endpoint, opts={}){
-    const res=await fetch((base||'')+endpoint,{credentials:'include',...opts,headers:{'Accept':'application/json','Content-Type':'application/json',...(opts.headers||{})}});
-    if(!res.ok){ let body={}; try{body=await res.json();}catch{}; const err=new Error(body.message||body.detail||`API request failed (${res.status})`); err.status=res.status; throw err; }
-    const text=await res.text(); return text?JSON.parse(text):null;
+  async function api(base, endpoint, opts={}) {
+    const isMultipart = typeof FormData !== 'undefined' && opts.body instanceof FormData;
+    const headers = {'Accept':'application/json', ...(isMultipart ? {} : {'Content-Type':'application/json'}), ...(opts.headers || {})};
+    if (isMultipart) { delete headers['Content-Type']; delete headers['content-type']; }
+    const res = await fetch((base || '') + endpoint, {credentials:'include', ...opts, headers});
+    if (!res.ok) {
+      let body = {}; try { body = await res.json(); } catch (_) {}
+      const err = new Error(body.message || body.detail || `API request failed (${res.status})`);
+      err.status = res.status;
+      throw err;
+    }
+    const text = await res.text();
+    return text ? JSON.parse(text) : null;
   }
   async function customerApi(endpoint,opts){ return api(cfg.customerApi,endpoint,opts); }
   async function adminApi(endpoint,opts){ return api(cfg.adminApi,endpoint,opts); }
@@ -120,6 +134,103 @@
     document.querySelectorAll('a[href*="wa.me"], [data-whatsapp]').forEach(el=>{el.href='https://wa.me/'+cfg.whatsapp;});
     document.querySelectorAll('a[href^="tel:"]').forEach(el=>{ if(/98765|98450|94432|1800|842-GEAR/i.test(el.textContent||'')) el.href='tel:+91'+cfg.phone.replace(/^91/,''); el.textContent='+91 73587 37658'; });
   }
+  function themeWebsiteAndPage() {
+    const path = currentDir.toLowerCase();
+    if (isAdmin) {
+      if (path.includes('admin_login')) return { website: 'admin', page: 'login' };
+      if (path.includes('admin_content_manager')) return { website: 'admin', page: 'theme' };
+      if (path.includes('admin_page_3_category')) return { website: 'admin', page: 'categories' };
+      if (path.includes('admin_page_1') || path.includes('admin_page_2') || path.includes('primary_admin_')) return { website: 'admin', page: 'operations' };
+      return { website: 'admin', page: 'operations' };
+    }
+    if (/customer_page_1_home|home_storefront|\/cart\/?$/.test(path)) return { website: 'cart', page: 'home' };
+    if (/combo_packs|shop_all_products|customer_page_2_product_listing|customer_page_3_product_details/.test(path)) return { website: 'cart', page: 'products' };
+    if (/shopping_cart/.test(path)) return { website: 'cart', page: 'cart' };
+    if (/login|registration|reset_password/.test(path)) return { website: 'cart', page: 'auth' };
+    if (/my_orders|order_details_tracking|order_confirmation/.test(path)) return { website: 'cart', page: 'orders' };
+    if (/tracker|tracking/.test(path)) return { website: 'cart', page: 'tracker' };
+    if (/whatsapp/.test(path)) return { website: 'cart', page: 'whatsapp' };
+    if (/safety/.test(path)) return { website: 'cart', page: 'safety' };
+    if (/shipping|transport/.test(path)) return { website: 'cart', page: 'transport' };
+    if (/price|table/.test(path)) return { website: 'cart', page: 'table' };
+    return { website: 'cart', page: 'home' };
+  }
+
+  function applyThemeValue(selector, field, value) {
+    if (value == null || value === '') return;
+    document.querySelectorAll(selector).forEach(el => {
+      const style = el.style;
+      const cssFields = {
+        font_family: 'font-family', font_size: 'font-size', font_weight: 'font-weight',
+        line_height: 'line-height', letter_spacing: 'letter-spacing', text_color: 'color',
+        background_color: 'background-color', border_color: 'border-color',
+        border_width: 'border-width', border_radius: 'border-radius', box_shadow: 'box-shadow',
+        padding: 'padding', margin: 'margin', width: 'width', max_width: 'max-width',
+        text_align: 'text-align'
+      };
+      if (field === 'content_value') el.textContent = String(value);
+      else if (cssFields[field]) style.setProperty(cssFields[field], String(value));
+    });
+  }
+
+  async function hydrateDatabaseTheme() {
+    const target = themeWebsiteAndPage();
+    try {
+      const response = await customerApi('/cms/theme/' + encodeURIComponent(target.website) + '/' + encodeURIComponent(target.page));
+      const page = response?.page;
+      if (page) {
+        const root = document.documentElement;
+        const variables = {
+          '--rtc-db-background': page.background_color,
+          '--rtc-db-surface': page.surface_color,
+          '--rtc-db-surface-elevated': page.surface_elevated_color,
+          '--rtc-db-section': page.section_color,
+          '--rtc-db-header': page.header_color,
+          '--rtc-db-footer': page.footer_color,
+          '--rtc-db-text': page.text_color,
+          '--rtc-db-muted': page.muted_text_color,
+          '--rtc-db-heading': page.heading_color,
+          '--rtc-db-primary': page.primary_color,
+          '--rtc-db-primary-dark': page.primary_dark_color,
+          '--rtc-db-secondary': page.secondary_color,
+          '--rtc-db-accent': page.accent_color,
+          '--rtc-db-link': page.link_color,
+          '--rtc-db-border': page.border_color,
+          '--rtc-db-font-heading': page.font_heading,
+          '--rtc-db-font-body': page.font_body,
+          '--rtc-db-radius-small': page.radius_small,
+          '--rtc-db-radius-medium': page.radius_medium,
+          '--rtc-db-radius-large': page.radius_large
+        };
+        Object.entries(variables).forEach(([key, value]) => {
+          if (typeof value === 'string' && value.length < 160) root.style.setProperty(key, value);
+        });
+        root.dataset.databaseTheme = target.website + ':' + target.page;
+      }
+      const components = Array.isArray(response?.components) ? response.components : [];
+      for (const component of components) {
+        const key = String(component.component_key || '');
+        if (!/^[a-z0-9_-]{1,100}$/i.test(key)) continue;
+        const selectors = [
+          '[data-theme-component="' + key + '"]',
+          '[data-component-key="' + key + '"]',
+          '#component-' + key
+        ];
+        for (const selector of selectors) {
+          applyThemeValue(selector, 'content_value', component.content_value);
+          ['font_family','font_size','font_weight','line_height','letter_spacing','text_color',
+           'background_color','border_color','border_width','border_radius','box_shadow',
+           'padding','margin','width','max_width','text_align'].forEach(field => {
+            applyThemeValue(selector, field, component[field]);
+          });
+        }
+      }
+    } catch (error) {
+      // Keep the static/local theme working when the optional live theme API is unavailable.
+      console.warn('Database theme settings unavailable', error);
+    }
+  }
+
   async function hydrateCms(){
     const slugMap={'/about':'about','/shipping':'shipping','/privacy-policy':'privacy-policy','/terms-and-conditions':'terms-and-conditions'};
     const key=slugMap[location.pathname]; if(!key) return;
@@ -173,11 +284,11 @@
   async function adminContentEditor(){
     if(!isAdmin || !/admin_content_manager/.test(currentDir)) return;
     const rootEl=document.getElementById('rtc-cms-app'); if(!rootEl)return;
-    const kinds=['pages','home-sections','faqs','policies']; let current='pages';
+    const kinds=['theme-pages','theme-components','pages','home-sections','faqs','policies']; let current='theme-pages';
     const state={items:[],selected:null};
     const render=()=>{rootEl.innerHTML=`<div class="grid md:grid-cols-[260px_1fr] gap-6"><aside class="bg-white rounded-2xl border p-4"><h2 class="font-bold text-lg mb-4">Content types</h2>${kinds.map(k=>`<button data-kind="${k}" class="w-full text-left px-3 py-2 rounded-lg mb-1 ${k===current?'bg-red-600 text-white':'hover:bg-amber-50'}">${k}</button>`).join('')}</aside><section class="bg-white rounded-2xl border p-5"><div class="flex items-center justify-between gap-3 mb-4"><div><h2 class="font-bold text-xl">${current}</h2><p class="text-sm text-slate-500">Edit live content stored in the CMS database.</p></div><button id="cms-refresh" class="px-3 py-2 rounded-lg bg-slate-900 text-white">Refresh</button></div><div id="cms-list" class="space-y-2"></div><div id="cms-editor" class="mt-5"></div></section></div>`; rootEl.querySelectorAll('[data-kind]').forEach(b=>b.onclick=()=>{current=b.dataset.kind;load()}); rootEl.querySelector('#cms-refresh').onclick=load; };
-    async function load(){render(); try{state.items=await adminApi('/cms/'+current); if(!Array.isArray(state.items)) state.items=state.items?.items||[]; const list=rootEl.querySelector('#cms-list'); list.innerHTML=state.items.map((x,i)=>`<button data-i="${i}" class="w-full text-left p-3 rounded-lg border hover:border-red-400"><div class="font-semibold">${escapeHtml(x.title||x.question||x.policy_key||x.section_key||('Record '+(i+1)))}</div><div class="text-xs text-slate-500">ID ${x.page_id||x.faq_id||x.policy_id||x.section_id||'—'}</div></button>`).join('')||'<p class="text-slate-500">No records yet.</p>'; list.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>edit(state.items[Number(b.dataset.i)])); }catch(e){rootEl.querySelector('#cms-list').innerHTML=`<p class="text-red-600">${escapeHtml(e.message||'Admin authentication or API unavailable.')}</p>`}}
-    function edit(x){const ed=rootEl.querySelector('#cms-editor'); const id=x.page_id||x.faq_id||x.policy_id||x.section_id; ed.innerHTML=`<div class="border-t pt-5"><h3 class="font-bold mb-3">Edit record #${id}</h3><textarea id="cms-json" class="w-full min-h-72 p-3 border rounded-xl font-mono text-sm">${escapeHtml(JSON.stringify(x,null,2))}</textarea><div class="mt-3 flex gap-2"><button id="cms-save" class="px-4 py-2 rounded-lg bg-red-600 text-white">Save</button><button id="cms-cancel" class="px-4 py-2 rounded-lg border">Cancel</button></div></div>`; ed.querySelector('#cms-save').onclick=async()=>{try{const obj=JSON.parse(ed.querySelector('#cms-json').value); const payload={...obj}; delete payload.page_id;delete payload.faq_id;delete payload.policy_id;delete payload.section_id;delete payload.created_at;delete payload.updated_at; const id=x.page_id||x.faq_id||x.policy_id||x.section_id; await adminApi(`/cms/${current}/${id}`,{method:'PATCH',body:JSON.stringify({data:payload})}); notify('CMS record saved.');load();}catch(e){notify(e.message||'Save failed.','error')}}; ed.querySelector('#cms-cancel').onclick=()=>ed.innerHTML='';}
+    async function load(){render(); try{state.items=await adminApi('/cms/'+current); if(!Array.isArray(state.items)) state.items=state.items?.items||[]; const list=rootEl.querySelector('#cms-list'); list.innerHTML=state.items.map((x,i)=>`<button data-i="${i}" class="w-full text-left p-3 rounded-lg border hover:border-red-400"><div class="font-semibold">${escapeHtml(x.page_name||x.component_name||x.title||x.question||x.policy_key||x.component_key||x.section_key||('Record '+(i+1)))}</div><div class="text-xs text-slate-500">ID ${x.theme_page_id||x.theme_component_id||x.page_id||x.faq_id||x.policy_id||x.section_id||'—'}</div></button>`).join('')||'<p class="text-slate-500">No records yet.</p>'; list.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>edit(state.items[Number(b.dataset.i)])); }catch(e){rootEl.querySelector('#cms-list').innerHTML=`<p class="text-red-600">${escapeHtml(e.message||'Admin authentication or API unavailable.')}</p>`}}
+    function edit(x){const ed=rootEl.querySelector('#cms-editor'); const id=x.theme_page_id||x.theme_component_id||x.page_id||x.faq_id||x.policy_id||x.section_id; ed.innerHTML=`<div class="border-t pt-5"><h3 class="font-bold mb-3">Edit record #${id}</h3><textarea id="cms-json" class="w-full min-h-72 p-3 border rounded-xl font-mono text-sm">${escapeHtml(JSON.stringify(x,null,2))}</textarea><div class="mt-3 flex gap-2"><button id="cms-save" class="px-4 py-2 rounded-lg bg-red-600 text-white">Save</button><button id="cms-cancel" class="px-4 py-2 rounded-lg border">Cancel</button></div></div>`; ed.querySelector('#cms-save').onclick=async()=>{try{const obj=JSON.parse(ed.querySelector('#cms-json').value); const payload={...obj}; delete payload.theme_page_id;delete payload.theme_component_id;delete payload.website_key;delete payload.page_key;delete payload.section_key;delete payload.component_key;delete payload.page_id;delete payload.faq_id;delete payload.policy_id;delete payload.section_id;delete payload.created_at;delete payload.updated_at; const id=x.theme_page_id||x.theme_component_id||x.page_id||x.faq_id||x.policy_id||x.section_id; await adminApi(`/cms/${current}/${id}`,{method:'PATCH',body:JSON.stringify(current==='theme-pages'||current==='theme-components'?payload:{data:payload})}); notify('CMS record saved.');load();}catch(e){notify(e.message||'Save failed.','error')}}; ed.querySelector('#cms-cancel').onclick=()=>ed.innerHTML='';}
     function escapeHtml(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
     load();
   }
@@ -230,10 +341,29 @@
   function patchLocalLinks(){
     document.querySelectorAll('a[href="#"]').forEach(a=>{const t=(a.textContent||'').trim(); if(/order now|whatsapp business/i.test(t)) a.href='https://wa.me/'+cfg.whatsapp;});
   }
+  async function guardAdminSession() {
+    if (!isAdmin || isAdminLogin) return;
+    try {
+      // Use a read-only, permission-checked endpoint to validate the HttpOnly
+      // admin session. Tokens are never copied to local/session storage.
+      await adminApi('/auth/me');
+    } catch (error) {
+      if (error && error.status === 401) {
+        location.replace(new URL('../admin_login_rtcrackers/code.html', location.href).href);
+        return;
+      }
+      if (error && error.status === 403) {
+        document.body.innerHTML = '<main style="max-width:620px;margin:12vh auto;padding:24px;font:16px/1.5 system-ui;color:#10224b"><h1>Admin permission required</h1><p>This account does not have permission to access the admin workspace.</p><a href="../admin_login_rtcrackers/code.html">Sign in with another administrator account</a></main>';
+        return;
+      }
+      notify('Admin API is temporarily unavailable. Reload after the service recovers.', 'error');
+    }
+  }
   function boot(){
     addThemeBar(); setLogo(); wireNavigation(); wireWhatsApp(); patchLocalLinks(); injectHomeBanner(); sanitizeCustomerContent(); addSyncBadge();
-    refreshCartBadge(); hydrateCms(); bindLogin(); bindRegistration(); bindAddToCart(); hydrateCatalog(); hydrateProduct(); hydrateCart(); hydrateCheckout(); adminContentEditor();
-    window.RTApi={customerApi,adminApi,platformApi,notify};
+    refreshCartBadge(); hydrateDatabaseTheme(); hydrateCms(); bindLogin(); bindRegistration(); bindAddToCart(); hydrateCatalog(); hydrateProduct(); hydrateCart(); hydrateCheckout(); adminContentEditor();
+    window.RTApi={customerApi,adminApi,platformApi,notify,pageUrl,money,escapeHtml,escapeAttr,isAdmin,isAdminLogin,config:cfg};
+    guardAdminSession();
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
 })();

@@ -17,6 +17,7 @@
 
   const routes = {
     inbox: "/FRONTEND/EMAIL/PAGES/inbox.html",
+    login: "/FRONTEND/EMAIL/PAGES/login.html",
     sent: "/FRONTEND/EMAIL/PAGES/sent.html",
     drafts: "/FRONTEND/EMAIL/PAGES/drafts.html",
     starred: "/FRONTEND/EMAIL/PAGES/starred.html",
@@ -36,6 +37,54 @@
     el.textContent = text;
     document.body.appendChild(el);
     setTimeout(() => el.remove(), error ? 6000 : 2400);
+  }
+
+  async function hydrateMailTheme() {
+    try {
+      const themePage = /login/i.test(page) ? 'login' : 'inbox';
+      const response = await fetch('/api/v1/cms/theme/mail/' + themePage, {credentials:'omit', headers:{Accept:'application/json'}});
+      if (!response.ok) return;
+      const data = await response.json();
+      const theme = data && data.page;
+      if (!theme) return;
+      const root = document.documentElement;
+      const vars = {
+        '--rtc-mail-bg': theme.background_color,
+        '--rtc-mail-surface': theme.surface_color,
+        '--rtc-mail-section': theme.section_color,
+        '--rtc-mail-header': theme.header_color,
+        '--rtc-mail-footer': theme.footer_color,
+        '--rtc-mail-text': theme.text_color,
+        '--rtc-mail-muted': theme.muted_text_color,
+        '--rtc-mail-heading': theme.heading_color,
+        '--rtc-mail-primary': theme.primary_color,
+        '--rtc-mail-primary-dark': theme.primary_dark_color,
+        '--rtc-mail-secondary': theme.secondary_color,
+        '--rtc-mail-accent': theme.accent_color,
+        '--rtc-mail-border': theme.border_color,
+        '--rtc-mail-font-heading': theme.font_heading,
+        '--rtc-mail-font-body': theme.font_body,
+        '--rtc-mail-radius': theme.radius_medium
+      };
+      Object.entries(vars).forEach(([key, value]) => {
+        if (typeof value === 'string' && value.length < 160 && !/[{};]/.test(value)) root.style.setProperty(key, value);
+      });
+      root.dataset.dbMailTheme = themePage;
+      for (const component of Array.isArray(data.components) ? data.components : []) {
+        const key = String(component.component_key || '');
+        if (!/^[a-z0-9_-]{1,100}$/i.test(key)) continue;
+        document.querySelectorAll('[data-theme-component="' + key + '"]').forEach(el => {
+          if (component.content_value) el.textContent = String(component.content_value);
+          if (component.text_color) el.style.color = String(component.text_color);
+          if (component.background_color) el.style.backgroundColor = String(component.background_color);
+          if (component.border_color) el.style.borderColor = String(component.border_color);
+          if (component.padding) el.style.padding = String(component.padding);
+          if (component.border_radius) el.style.borderRadius = String(component.border_radius);
+        });
+      }
+    } catch (error) {
+      console.warn('Database mail theme unavailable', error);
+    }
   }
 
   function localizeAssets() {
@@ -89,7 +138,7 @@
   }
 
   function makeRow(item) {
-    const sender = displayValue(item.from_address || item.to_address || "Unknown");
+    const sender = displayValue(item.to_address || item.from_address || "Unknown");
     const initials = sender.replace(/<.*?>/g, "").trim().split(/[\s@._-]+/).filter(Boolean).slice(0,2).map(x => x[0]).join("").toUpperCase() || "?";
     const row = document.createElement("div");
     row.className = `email-row group relative flex items-start gap-space-sm px-space-md py-space-sm ${item.is_read ? "bg-white" : "bg-orange-50/50 border-l-4 border-l-tag-notifications"} hover:bg-orange-50/70 transition-colors cursor-pointer`;
@@ -147,6 +196,73 @@
     items.forEach(item => parent.appendChild(makeRow(item)));
   }
 
+
+  async function hydrateLiveFolder() {
+    const id = await ensureMailbox();
+    if (!id) return;
+    let kind = null;
+    if (/\/inbox\.html$/i.test(page) || page === "/") kind = "inbox";
+    else if (/\/sent\.html$/i.test(page)) kind = "sent";
+    else if (/\/starred\.html$/i.test(page)) kind = "starred";
+    else if (/\/archived\.html$/i.test(page)) kind = "archived";
+    else if (/\/trash\.html$/i.test(page)) kind = "trash";
+    else if (/\/drafts\.html$/i.test(page)) kind = "drafts";
+    else if (/\/search\.html$/i.test(page)) kind = "search";
+    if (!kind) return;
+
+    const load = async () => {
+      const queryInput = document.getElementById("globalSearchInput")
+        || document.getElementById("omnisearch-input")
+        || document.getElementById("input-search")
+        || document.querySelector('input[type="search"],input[placeholder*="Search" i]');
+      const q = (queryInput?.value || "").trim();
+      if (kind === "search" && !q) return;
+      const method = kind === "search" ? "search" : kind;
+      const items = await api[method](id, ...(kind === "search" ? [q] : []));
+      const selectors = {
+        inbox: "#email-list-container",
+        sent: "#sent-list-container",
+        starred: "#feed-live-container",
+        archived: "#email-list-wrapper",
+        trash: "#view-state-list",
+        drafts: "#draftsFeedContainer, #draftsList",
+        search: "#stateResults"
+      };
+      const host = document.querySelector(selectors[kind]) || document.querySelector("[data-mail-list]");
+      const previousRows = [...document.querySelectorAll(".email-row")];
+      const target = host || previousRows[0]?.parentElement;
+      if (!target) return;
+      if (previousRows.length) previousRows.forEach(row => row.remove());
+      if (kind === "search" || kind === "drafts" || kind === "trash") {
+        target.querySelectorAll(".rtc-mail-empty").forEach(node => node.remove());
+      }
+      if (!items.length) {
+        const empty = document.createElement("p");
+        empty.className = "rtc-mail-empty p-6 text-center text-sm text-secondary";
+        empty.textContent = kind === "inbox" ? "No messages in this inbox." : kind === "sent" ? "No sent messages yet." : kind === "starred" ? "No starred messages." : kind === "archived" ? "No archived messages." : kind === "trash" ? "Trash is empty." : kind === "drafts" ? "No saved drafts." : "No matching messages.";
+        target.appendChild(empty);
+        return;
+      }
+      target.querySelectorAll(".rtc-mail-empty").forEach(node => node.remove());
+      items.forEach(item => target.appendChild(makeRow(item)));
+    };
+
+    try { await load(); }
+    catch (err) { notify(err.message || "Could not load messages", true); }
+
+    const searchInput = document.getElementById("globalSearchInput")
+      || document.getElementById("omnisearch-input")
+      || document.getElementById("input-search");
+    if (kind === "search" && searchInput && !searchInput.dataset.rtcLiveSearch) {
+      searchInput.dataset.rtcLiveSearch = "1";
+      let timer;
+      searchInput.addEventListener("input", () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => load().catch(err => notify(err.message, true)), 250);
+      });
+    }
+  }
+
   async function hydrateMessage() {
     if (!/message/i.test(page)) return;
     const id = Number(localStorage.getItem("rtc-mail-open-message") || 0);
@@ -155,8 +271,25 @@
     const title = document.querySelector("h1, h2");
     if (title && data.subject) title.textContent = data.subject;
     const bodyTargets = document.querySelectorAll("[data-email-body], .email-body, article");
-    if (bodyTargets.length && (data.body_html || data.body_text)) {
-      bodyTargets[bodyTargets.length - 1].innerHTML = data.body_html || `<pre style="white-space:pre-wrap">${escapeHtml(data.body_text || "")}</pre>`;
+    const host = bodyTargets.length ? bodyTargets[bodyTargets.length - 1] : null;
+    if (host && (data.body_html || data.body_text)) {
+      host.replaceChildren();
+      if (data.body_html) {
+        // HTML email bodies are untrusted. Isolate them in a sandboxed iframe;
+        // never inject remote mail HTML into the privileged mail application's DOM.
+        const frame = document.createElement("iframe");
+        frame.title = "Email message body";
+        frame.setAttribute("sandbox", "");
+        frame.setAttribute("referrerpolicy", "no-referrer");
+        frame.style.cssText = "display:block;width:100%;min-height:320px;border:0;background:white";
+        frame.srcdoc = "<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><style>body{font:14px/1.55 system-ui,sans-serif;overflow-wrap:anywhere}img,table,video{max-width:100%;height:auto}pre{white-space:pre-wrap;overflow-wrap:anywhere}</style></head><body>" + String(data.body_html) + "</body></html>";
+        host.appendChild(frame);
+      } else {
+        const pre = document.createElement("pre");
+        pre.style.cssText = "white-space:pre-wrap;overflow-wrap:anywhere";
+        pre.textContent = data.body_text || "";
+        host.appendChild(pre);
+      }
     }
   }
 
@@ -183,14 +316,16 @@
 
   async function boot() {
     localizeAssets();
+    hydrateMailTheme();
     wirePaths();
     try {
       await ensureMailbox();
-      await hydrateInbox();
+      await hydrateLiveFolder();
       await hydrateMessage();
       await hydrateCompose();
       if (/inbox/i.test(page)) notify("RTC Crackers Mail connected");
     } catch (err) {
+      if (err && err.status === 401 && !/\/login\.html$/i.test(page)) { location.replace(routes.login); return; }
       notify(err.message || "Mail service unavailable", true);
     }
   }

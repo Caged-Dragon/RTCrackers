@@ -72,3 +72,28 @@ table {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+
+
+/* Database-controlled mail workspace theme. Viewport sizing remains local. */
+:root[data-db-mail-theme] body {
+  background: var(--rtc-mail-bg, #f8f9ff) !important;
+  color: var(--rtc-mail-text, #0b1c30) !important;
+  font-family: var(--rtc-mail-font-body, Inter, system-ui, sans-serif);
+}
+:root[data-db-mail-theme] header {
+  background-color: var(--rtc-mail-header, #fff) !important;
+}
+:root[data-db-mail-theme] h1,
+:root[data-db-mail-theme] h2,
+:root[data-db-mail-theme] h3 {
+  color: var(--rtc-mail-heading, inherit);
+  font-family: var(--rtc-mail-font-heading, inherit);
+}
+:root[data-db-mail-theme] .bg-primary,
+:root[data-db-mail-theme] .bg-primary-container {
+  background-color: var(--rtc-mail-primary, #a33900) !important;
+}
+:root[data-db-mail-theme] .border-outline-variant,
+:root[data-db-mail-theme] .border-subtle {
+  border-color: var(--rtc-mail-border, #e2bfb2) !important;
+}

@@ -90,6 +90,10 @@ services:
     volumes:
       - ./devops/nginx.conf:/etc/nginx/nginx.conf:ro
       - ../FRONTEND/WEB:/usr/share/nginx/html:ro
+      - ../FRONTEND/SITE:/usr/share/nginx/html/site:ro
+      - ../FRONTEND/EMAIL:/usr/share/nginx/html/email:ro
+      - ../ASSETS:/usr/share/nginx/html/assets-root:ro
+      - ./media:/usr/share/nginx/html/media:ro
     restart: unless-stopped
     networks: [rtc]
 

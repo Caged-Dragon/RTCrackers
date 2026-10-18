@@ -128,3 +128,122 @@ table {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+
+/* Shared combo catalogue/admin manager styles. Purely presentational; never persisted. */
+.rtc-combo-section, .rtc-combo-admin { width: min(calc(100% - 2rem), 1440px); margin-inline: auto; padding-block: clamp(1.5rem, 4vw, 3.5rem); min-width: 0; }
+.rtc-combo-section-head, .rtc-combo-admin-head { display:flex; justify-content:space-between; align-items:end; gap:1rem; flex-wrap:wrap; margin-bottom:1.5rem; }
+.rtc-combo-section-head h2, .rtc-combo-admin-head h2 { font-size:clamp(1.6rem,3vw,2.35rem); font-weight:800; line-height:1.12; margin:.45rem 0; overflow-wrap:anywhere; }
+.rtc-combo-section-head p, .rtc-combo-admin-head p { color:var(--rtc-muted); font-size:.92rem; line-height:1.55; max-width:70ch; }
+.rtc-combo-section-head>a { color:var(--rtc-red); font-weight:700; text-decoration:underline; text-underline-offset:4px; }
+.rtc-combo-eyebrow { color:var(--rtc-red); font-size:.72rem; letter-spacing:.18em; text-transform:uppercase; font-weight:800; }
+.rtc-combo-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,285px),1fr)); gap:1.2rem; }
+.rtc-combo-card { min-width:0; overflow:hidden; display:flex; flex-direction:column; background:#fff; border:1px solid var(--rtc-border); border-radius:1rem; box-shadow:0 12px 28px rgba(16,34,75,.06); }
+.rtc-combo-photo { display:block; width:100%; aspect-ratio:4/3; object-fit:cover; background:#fff3cf; }
+.rtc-combo-card-body { display:flex; flex:1; flex-direction:column; gap:.75rem; min-width:0; padding:1rem; }
+.rtc-combo-title-row { display:flex; align-items:flex-start; justify-content:space-between; gap:.75rem; }
+.rtc-combo-tier { color:#8a6500; font-size:.7rem; text-transform:uppercase; letter-spacing:.1em; font-weight:800; }
+.rtc-combo-title-row h3 { font-size:1.2rem; font-weight:800; line-height:1.25; margin-top:.25rem; overflow-wrap:anywhere; }
+.rtc-combo-badge { flex-shrink:0; border-radius:999px; padding:.25rem .55rem; color:#654a00; background:#fff0ba; font-size:.68rem; font-weight:800; }
+.rtc-combo-tagline { font-size:.9rem; font-weight:700; }
+.rtc-combo-desc { color:var(--rtc-muted); font-size:.87rem; line-height:1.5; }
+.rtc-combo-price { display:flex; align-items:baseline; flex-wrap:wrap; gap:.65rem; margin-top:auto; }
+.rtc-combo-price strong { color:var(--rtc-red); font-weight:800; font-size:1.5rem; }
+.rtc-combo-price del { color:var(--rtc-muted); font-size:.9rem; }
+.rtc-combo-price span { color:#087a38; font-weight:800; font-size:.75rem; }
+.rtc-combo-details { border-top:1px solid var(--rtc-border); padding-top:.7rem; font-size:.86rem; }
+.rtc-combo-details summary { cursor:pointer; font-weight:700; }
+.rtc-combo-details ul { list-style:none; margin:.45rem 0 0; padding:0; }
+.rtc-combo-item-line { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; border-bottom:1px solid #f1e9d6; padding:.55rem 0; font-size:.8rem; }
+.rtc-combo-item-line strong { flex-shrink:0; }
+.rtc-combo-enquire { display:flex; align-items:center; justify-content:center; text-align:center; border-radius:.65rem; padding:.8rem 1rem; background:var(--rtc-red); color:white !important; font-weight:800; font-size:.88rem; text-decoration:none !important; }
+.rtc-combo-empty, .rtc-combo-loading { padding:2rem; text-align:center; border:1px solid var(--rtc-border); border-radius:1rem; background:#fff; overflow-wrap:anywhere; }
+.rtc-combo-status { margin-block:1rem; color:var(--rtc-muted); font-size:.9rem; }
+.rtc-combo-error { color:#b42318 !important; }
+.rtc-combo-success { color:#087a38 !important; }
+.rtc-combo-admin-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr)); gap:1rem; }
+.rtc-combo-admin-card { display:flex; align-items:flex-start; gap:1rem; min-width:0; padding:1rem; border:1px solid var(--rtc-border); border-radius:.9rem; background:white; }
+.rtc-combo-admin-card>img { width:100px; height:100px; flex-shrink:0; object-fit:cover; border-radius:.6rem; background:#fff3cf; }
+.rtc-combo-admin-info { flex:1; min-width:0; }
+.rtc-combo-admin-meta { display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; font-size:.68rem; font-weight:800; color:var(--rtc-muted); }
+.rtc-combo-active { color:#087a38; }
+.rtc-combo-inactive { color:#7c879b; }
+.rtc-combo-admin-info h3 { margin:.35rem 0; font-weight:800; font-size:1.06rem; overflow-wrap:anywhere; }
+.rtc-combo-admin-info p { font-size:.83rem; color:var(--rtc-muted); margin-top:.25rem; overflow-wrap:anywhere; }
+.rtc-combo-actions { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.8rem; }
+.rtc-combo-primary, .rtc-combo-secondary { display:inline-flex; align-items:center; justify-content:center; gap:.4rem; padding:.65rem .9rem; border-radius:.6rem; font-size:.86rem; font-weight:800; cursor:pointer; max-width:100%; }
+.rtc-combo-primary { border:1px solid var(--rtc-red); background:var(--rtc-red); color:#fff; }
+.rtc-combo-secondary { border:1px solid var(--rtc-border); background:#fff; color:var(--rtc-ink); }
+.rtc-combo-primary:disabled { opacity:.6; cursor:wait; }
+.rtc-combo-dialog { width:min(920px,96vw); max-width:none; max-height:92vh; padding:0; border:1px solid var(--rtc-border); border-radius:1rem; background:#fff; color:var(--rtc-ink); overflow:auto; box-shadow:0 25px 80px rgba(5,15,40,.3); }
+.rtc-combo-dialog::backdrop { background:rgba(4,12,31,.62); backdrop-filter:blur(3px); }
+.rtc-combo-dialog-head { position:sticky; top:0; z-index:2; display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; background:#fff; border-bottom:1px solid var(--rtc-border); padding:1rem 1.25rem; }
+.rtc-combo-dialog-head h3 { font-size:1.3rem; font-weight:800; }
+.rtc-combo-dialog-head p, .rtc-combo-items-head p { color:var(--rtc-muted); font-size:.8rem; margin-top:.2rem; }
+.rtc-combo-x { padding:.1rem .55rem; font-size:1.7rem; line-height:1; border-radius:.4rem; }
+.rtc-combo-form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; padding:1.25rem; }
+.rtc-combo-form-grid label { display:block; font-size:.83rem; font-weight:700; min-width:0; }
+.rtc-combo-form-grid input:not([type=checkbox]):not([type=file]), .rtc-combo-form-grid select, .rtc-combo-form-grid textarea { display:block; width:100%; min-width:0; margin-top:.35rem; padding:.7rem .75rem; border:1px solid #d5dced; border-radius:.55rem; background:white; color:#10224b; font:500 .9rem Inter,system-ui,sans-serif; }
+.rtc-combo-form-grid input[type=file] { display:block; max-width:100%; margin-top:.5rem; font-size:.78rem; }
+.rtc-combo-form-grid input[type=checkbox] { margin-right:.4rem; }
+.rtc-combo-span-two, .rtc-span-two { grid-column:1/-1; }
+.rtc-combo-image-control { display:grid; grid-template-columns:150px minmax(0,1fr); align-items:start; gap:1rem; }
+.rtc-combo-image-control>img { width:100%; aspect-ratio:1; object-fit:cover; border:1px solid var(--rtc-border); border-radius:.7rem; background:#fff3cf; }
+.rtc-combo-image-control small { display:block; color:var(--rtc-muted); margin:.35rem 0 .85rem; font-size:.75rem; line-height:1.45; }
+.rtc-combo-checks { display:flex; flex-wrap:wrap; gap:1rem 1.5rem; font-size:.86rem; }
+.rtc-combo-items-head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.8rem; border-top:1px solid var(--rtc-border); padding-top:1rem; }
+.rtc-combo-items-head h4 { font-size:1.05rem; font-weight:800; }
+.rtc-combo-item-rows { display:grid; gap:.8rem; margin-top:.8rem; }
+.rtc-combo-item-row { display:grid; grid-template-columns:minmax(0,1fr) 110px auto; align-items:end; gap:.7rem; border:1px solid var(--rtc-border); border-radius:.7rem; padding:.8rem; min-width:0; }
+.rtc-combo-dialog-footer { position:sticky; bottom:0; display:flex; justify-content:flex-end; flex-wrap:wrap; gap:.65rem; padding:1rem 1.25rem; border-top:1px solid var(--rtc-border); background:#fff; }
+@media(max-width:640px) {
+  .rtc-combo-section,.rtc-combo-admin { width:calc(100% - 1.2rem); }
+  .rtc-combo-form-grid { grid-template-columns:minmax(0,1fr); padding:1rem; }
+  .rtc-combo-form-grid .rtc-span-two { grid-column:1; }
+  .rtc-combo-image-control { grid-template-columns:minmax(0,1fr); }
+  .rtc-combo-image-control>img { width:140px; }
+  .rtc-combo-item-row { grid-template-columns:minmax(0,1fr) 86px; }
+  .rtc-combo-item-row .rtc-c-remove-item { grid-column:1/-1; }
+  .rtc-combo-item-row .rtc-span-two { grid-column:1/-1; }
+  .rtc-combo-admin-card { gap:.7rem; padding:.7rem; }
+  .rtc-combo-admin-card>img { width:76px; height:76px; }
+}
+
+
+/* Live values from Supabase theme_page_settings for the active SITE runtime. */
+:root {
+  --rtc-db-background: var(--rtc-cream);
+  --rtc-db-surface: var(--rtc-white);
+  --rtc-db-text: var(--rtc-ink);
+  --rtc-db-muted: var(--rtc-muted);
+  --rtc-db-heading: var(--rtc-red);
+  --rtc-db-primary: var(--rtc-red);
+  --rtc-db-primary-dark: var(--rtc-red-dark);
+  --rtc-db-secondary: var(--rtc-gold);
+  --rtc-db-accent: var(--rtc-gold);
+  --rtc-db-link: var(--rtc-red);
+  --rtc-db-border: var(--rtc-border);
+}
+html[data-database-theme^="cart:"] body {
+  background: var(--rtc-db-background, var(--rtc-cream)) !important;
+  color: var(--rtc-db-text, var(--rtc-ink)) !important;
+  font-family: var(--rtc-db-font-body, Inter, system-ui, sans-serif);
+}
+html[data-database-theme^="admin:"] body {
+  background: var(--rtc-db-background, var(--rtc-cream)) !important;
+  color: var(--rtc-db-text, var(--rtc-ink)) !important;
+}
+html[data-database-theme] h1, html[data-database-theme] h2, html[data-database-theme] h3 {
+  color: var(--rtc-db-heading, var(--rtc-red));
+  font-family: var(--rtc-db-font-heading, inherit);
+}
+html[data-database-theme] a:not(.rtc-combo-enquire) { color: var(--rtc-db-link, var(--rtc-red)); }
+html[data-database-theme] .bg-primary, html[data-database-theme] .bg-primary-container,
+html[data-database-theme] .rtc-combo-primary, html[data-database-theme] .rtc-combo-enquire {
+  background-color: var(--rtc-db-button-background, var(--rtc-db-primary, var(--rtc-red))) !important;
+  color: var(--rtc-db-button-text, #fff) !important;
+}
+html[data-database-theme] .rtc-combo-card, html[data-database-theme] .rtc-combo-admin-card {
+  border-color: var(--rtc-db-border, var(--rtc-border));
+  border-radius: var(--rtc-db-radius-medium, 1rem);
+}

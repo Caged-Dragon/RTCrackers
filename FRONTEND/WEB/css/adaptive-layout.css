@@ -196,3 +196,32 @@ pre, .pre-wrap {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+
+/* Main portfolio theme values come from the database. Viewport/zoom settings
+   are never stored in theme_page_settings or theme_component_settings. */
+html.rt-db-theme body {
+  background: var(--rtc-db-background, inherit) !important;
+  color: var(--rtc-db-text, inherit) !important;
+  font-family: var(--rtc-db-font-body, inherit);
+}
+html.rt-db-theme .site-header {
+  background: var(--rtc-db-header, #fff) !important;
+  color: var(--rtc-db-nav-text, inherit) !important;
+}
+html.rt-db-theme .site-header .main-nav a { color: var(--rtc-db-nav-text, inherit); }
+html.rt-db-theme h1, html.rt-db-theme h2, html.rt-db-theme h3 { color: var(--rtc-db-heading, inherit); }
+html.rt-db-theme .hero { background: var(--rtc-db-hero-background, transparent); }
+html.rt-db-theme .section-alt { background: var(--rtc-db-section, transparent); }
+html.rt-db-theme .rt-banner-section { background: var(--rtc-db-banner-background, transparent); }
+html.rt-db-theme .btn-primary, html.rt-db-theme .btn.btn-primary {
+  background-color: var(--rtc-db-button-background, var(--rtc-db-primary)) !important;
+  color: var(--rtc-db-button-text, #fff) !important;
+  border-color: var(--rtc-db-primary-dark, transparent);
+}
+html.rt-db-theme a:not(.btn) { color: var(--rtc-db-link, inherit); }
+html.rt-db-theme .card, html.rt-db-theme .product-card {
+  box-shadow: var(--rtc-db-card-shadow, inherit);
+  border-color: var(--rtc-db-border, inherit);
+  border-radius: var(--rtc-db-radius-medium, inherit);
+}
