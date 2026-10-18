@@ -490,7 +490,7 @@ def _verify_resend_signature(raw: bytes, webhook_id: str, timestamp: str, signat
 
 
 @router.post("/webhook/resend")
-async def resend_webhook(request: __import__("fastapi").Request):
+async def resend_webhook(request: Request):
     """Receive verified Resend delivery and inbound-email events. Configure this URL in Resend."""
     import json
     from email.utils import parseaddr
