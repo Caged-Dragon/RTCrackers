@@ -26,14 +26,20 @@ def _public_headers() -> dict[str, str]:
 
 
 async def _rest_get(client: httpx.AsyncClient, path: str, params: dict[str, str]) -> list[dict]:
-    response = await client.get(
-        f"{settings.SUPABASE_URL.rstrip('/')}/rest/v1/{path}",
-        params=params,
-    )
+    try:
+        response = await client.get(
+            f"{settings.SUPABASE_URL.rstrip('/')}/rest/v1/{path}",
+            params=params,
+        )
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=503, detail="Combo catalogue service is temporarily unavailable") from exc
     if not response.is_success:
         # Keep upstream response bodies and configuration values out of public errors.
         raise HTTPException(status_code=502, detail="Combo catalogue service is temporarily unavailable")
-    data = response.json()
+    try:
+        data = response.json()
+    except ValueError as exc:
+        raise HTTPException(status_code=502, detail="Combo catalogue returned an invalid response") from exc
     if not isinstance(data, list):
         raise HTTPException(status_code=502, detail="Combo catalogue returned an invalid response")
     return data
