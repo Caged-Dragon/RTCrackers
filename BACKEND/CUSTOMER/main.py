@@ -19,6 +19,7 @@ from customers.profiles.routes import router as profile_router
 from customers.addresses.routes import router as addresses_router
 from customers.products.routes import router as products_router
 from customers.combos.routes import router as combos_router
+from customers.cms.routes import router as cms_router
 from customers.categories.routes import router as categories_router
 from customers.search.routes import router as search_router
 from customers.cart.routes import router as cart_router
@@ -59,7 +60,7 @@ from pathlib import Path
 Path(media).mkdir(parents=True,exist_ok=True)
 app.mount(settings.MEDIA_URL_PREFIX,StaticFiles(directory=media),name='media')
 
-for router in (auth_router,profile_router,addresses_router,products_router,combos_router,categories_router,search_router,cart_router,wishlist_router,checkout_router,orders_router,tracking_router,reviews_router,coupons_router,referrals_router,notifications_router,recently_viewed_router,dashboard_router,platform_router):
+for router in (auth_router,profile_router,addresses_router,products_router,combos_router,cms_router,categories_router,search_router,cart_router,wishlist_router,checkout_router,orders_router,tracking_router,reviews_router,coupons_router,referrals_router,notifications_router,recently_viewed_router,dashboard_router,platform_router):
     app.include_router(router,prefix=settings.API_V1_PREFIX)
 
 @app.get('/health',tags=['System'])
