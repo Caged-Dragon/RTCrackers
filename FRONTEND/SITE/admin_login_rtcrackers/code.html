@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow"><title>Admin Login | RT Crackers</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="../runtime/theme.css" rel="stylesheet">
+<style>
+body{font-family:Inter,system-ui,sans-serif}.login-shell{width:min(calc(100% - 2rem),460px);margin:clamp(2rem,10vh,7rem) auto}.login-card{background:#fff;border:1px solid var(--rtc-border);border-radius:1.2rem;box-shadow:0 25px 65px rgba(16,34,75,.12);padding:clamp(1.25rem,5vw,2.5rem)}.login-field{display:block;width:100%;margin-top:.45rem;border:1px solid #d4dbe8;border-radius:.65rem;padding:.8rem;color:#10224b;background:#fff}.login-primary{width:100%;margin-top:1.1rem;background:var(--rtc-red);color:#fff;padding:.9rem 1rem;border-radius:.65rem;font-weight:800}.login-primary:disabled{opacity:.65;cursor:wait}
+</style>
+</head>
+<body>
+<main class="login-shell">
+  <a href="../../index.html" class="font-extrabold text-lg" style="color:var(--rtc-red)">RT CRACKERS</a>
+  <section class="login-card mt-5">
+    <p class="text-xs uppercase tracking-[.18em] font-extrabold" style="color:var(--rtc-red)">Secure administration</p>
+    <h1 class="text-2xl sm:text-3xl font-extrabold mt-2">Sign in to admin</h1>
+    <p class="mt-2 text-sm leading-relaxed" style="color:var(--rtc-muted)">Use your registered administrator account. Authentication is handled by the server and uses secure HTTP-only cookies.</p>
+    <form id="admin-login-form" class="mt-6">
+      <label class="block text-sm font-bold" for="admin-email">Email address<input class="login-field" id="admin-email" type="email" autocomplete="username" required maxlength="254"></label>
+      <label class="block text-sm font-bold mt-4" for="admin-password">Password<input class="login-field" id="admin-password" type="password" autocomplete="current-password" required maxlength="200"></label>
+      <button class="login-primary" id="admin-login-submit" type="submit">Sign in securely</button>
+      <p id="admin-login-status" class="mt-4 text-sm" role="status" aria-live="polite"></p>
+    </form>
+  </section>
+</main>
+<script>
+(() => {
+ const form=document.getElementById('admin-login-form');
+ const status=document.getElementById('admin-login-status');
+ const button=document.getElementById('admin-login-submit');
+ form.addEventListener('submit', async event => {
+   event.preventDefault();
+   status.textContent='Authenticating…';
+   status.style.color='#53617d';
+   button.disabled=true;
+   try {
+     const response=await fetch('/api/v1/admin/auth/login',{
+       method:'POST',
+       credentials:'include',
+       headers:{'Accept':'application/json','Content-Type':'application/json'},
+       body:JSON.stringify({email:document.getElementById('admin-email').value.trim(),password:document.getElementById('admin-password').value})
+     });
+     const result=await response.json().catch(()=>({}));
+     if(!response.ok) throw new Error(result.detail||result.message||'Sign-in failed. Check your credentials and admin access.');
+     // Do not save access/refresh tokens in localStorage or sessionStorage.
+     location.replace(new URL('../primary_admin_complete_command_center_rtcrackers/code.html',location.href).href);
+   } catch(error) {
+     status.textContent=error.message||'Admin sign-in is unavailable.';
+     status.style.color='#b42318';
+   } finally { button.disabled=false; }
+ });
+})();
+</script>
+</body></html>
