@@ -453,3 +453,5 @@ async def restore_message(email_id: int = Path(ge=1), admin=Depends(require_perm
         raise HTTPException(status_code=404, detail="Message not found")
     folder = "sent" if rows[0].get("direction") == "outbound" else "inbox"
     return await _set_message_flag(email_id, {"folder": folder, "deleted_at": None})
+    if folder != "trash":
+        params["deleted_at"] = "is.null"
