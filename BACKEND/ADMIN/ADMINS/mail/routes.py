@@ -269,7 +269,7 @@ async def _insert_recipients(message_id: int, payload: MailPayload) -> None:
 
 
 @router.post("/drafts", status_code=201)
-async def create_draft(payload: MailPayload, admin=Depends(require_permission("products.read"))):
+async def create_draft(payload: MailPayload, admin=Depends(require_permission("products.write"))):
     mailbox = await _mailbox(payload.mailbox_id)
     if not payload.subject.strip() and not (payload.body_text or "").strip() and not (payload.body_html or "").strip():
         raise HTTPException(status_code=422, detail="A draft needs a subject or message body")
@@ -301,7 +301,7 @@ async def create_draft(payload: MailPayload, admin=Depends(require_permission("p
 
 
 @router.post("/send", status_code=201)
-async def send_email(payload: MailPayload, admin=Depends(require_permission("products.read"))):
+async def send_email(payload: MailPayload, admin=Depends(require_permission("products.write"))):
     if not payload.to:
         raise HTTPException(status_code=422, detail="At least one recipient is required")
     if not payload.subject.strip():
@@ -408,32 +408,32 @@ async def _set_message_flag(email_id: int, payload: dict):
 
 
 @router.post("/messages/{email_id}/read")
-async def mark_read(email_id: int = Path(ge=1), admin=Depends(require_permission("products.read"))):
+async def mark_read(email_id: int = Path(ge=1), admin=Depends(require_permission("products.write"))):
     return await _set_message_flag(email_id, {"is_read": True})
 
 
 @router.post("/messages/{email_id}/unread")
-async def mark_unread(email_id: int = Path(ge=1), admin=Depends(require_permission("products.read"))):
+async def mark_unread(email_id: int = Path(ge=1), admin=Depends(require_permission("products.write"))):
     return await _set_message_flag(email_id, {"is_read": False})
 
 
 @router.post("/messages/{email_id}/star")
-async def star_message(email_id: int = Path(ge=1), admin=Depends(require_permission("products.read"))):
+async def star_message(email_id: int = Path(ge=1), admin=Depends(require_permission("products.write"))):
     return await _set_message_flag(email_id, {"is_starred": True})
 
 
 @router.post("/messages/{email_id}/unstar")
-async def unstar_message(email_id: int = Path(ge=1), admin=Depends(require_permission("products.read"))):
+async def unstar_message(email_id: int = Path(ge=1), admin=Depends(require_permission("products.write"))):
     return await _set_message_flag(email_id, {"is_starred": False})
 
 
 @router.post("/messages/{email_id}/archive")
-async def archive_message(email_id: int = Path(ge=1), admin=Depends(require_permission("products.read"))):
+async def archive_message(email_id: int = Path(ge=1), admin=Depends(require_permission("products.write"))):
     return await _set_message_flag(email_id, {"folder": "archive", "deleted_at": None})
 
 
 @router.post("/messages/{email_id}/unarchive")
-async def unarchive_message(email_id: int = Path(ge=1), admin=Depends(require_permission("products.read"))):
+async def unarchive_message(email_id: int = Path(ge=1), admin=Depends(require_permission("products.write"))):
     rows = await _supa("GET", "email_messages", params={"select": "direction", "email_message_id": f"eq.{email_id}", "limit": "1"})
     if not rows:
         raise HTTPException(status_code=404, detail="Message not found")
@@ -442,12 +442,12 @@ async def unarchive_message(email_id: int = Path(ge=1), admin=Depends(require_pe
 
 
 @router.post("/messages/{email_id}/trash")
-async def trash_message(email_id: int = Path(ge=1), admin=Depends(require_permission("products.read"))):
+async def trash_message(email_id: int = Path(ge=1), admin=Depends(require_permission("products.write"))):
     return await _set_message_flag(email_id, {"folder": "trash", "deleted_at": datetime.now(timezone.utc).isoformat()})
 
 
 @router.post("/messages/{email_id}/restore")
-async def restore_message(email_id: int = Path(ge=1), admin=Depends(require_permission("products.read"))):
+async def restore_message(email_id: int = Path(ge=1), admin=Depends(require_permission("products.write"))):
     rows = await _supa("GET", "email_messages", params={"select": "direction", "email_message_id": f"eq.{email_id}", "limit": "1"})
     if not rows:
         raise HTTPException(status_code=404, detail="Message not found")
