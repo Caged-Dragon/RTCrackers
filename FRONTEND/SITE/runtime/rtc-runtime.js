@@ -134,6 +134,103 @@
     document.querySelectorAll('a[href*="wa.me"], [data-whatsapp]').forEach(el=>{el.href='https://wa.me/'+cfg.whatsapp;});
     document.querySelectorAll('a[href^="tel:"]').forEach(el=>{ if(/98765|98450|94432|1800|842-GEAR/i.test(el.textContent||'')) el.href='tel:+91'+cfg.phone.replace(/^91/,''); el.textContent='+91 73587 37658'; });
   }
+  function themeWebsiteAndPage() {
+    const path = currentDir.toLowerCase();
+    if (isAdmin) {
+      if (path.includes('admin_login')) return { website: 'admin', page: 'login' };
+      if (path.includes('admin_content_manager')) return { website: 'admin', page: 'theme' };
+      if (path.includes('admin_page_3_category')) return { website: 'admin', page: 'categories' };
+      if (path.includes('admin_page_1') || path.includes('admin_page_2') || path.includes('primary_admin_')) return { website: 'admin', page: 'operations' };
+      return { website: 'admin', page: 'operations' };
+    }
+    if (/customer_page_1_home|home_storefront|\/cart\/?$/.test(path)) return { website: 'cart', page: 'home' };
+    if (/combo_packs|shop_all_products|customer_page_2_product_listing|customer_page_3_product_details/.test(path)) return { website: 'cart', page: 'products' };
+    if (/shopping_cart/.test(path)) return { website: 'cart', page: 'cart' };
+    if (/login|registration|reset_password/.test(path)) return { website: 'cart', page: 'auth' };
+    if (/my_orders|order_details_tracking|order_confirmation/.test(path)) return { website: 'cart', page: 'orders' };
+    if (/tracker|tracking/.test(path)) return { website: 'cart', page: 'tracker' };
+    if (/whatsapp/.test(path)) return { website: 'cart', page: 'whatsapp' };
+    if (/safety/.test(path)) return { website: 'cart', page: 'safety' };
+    if (/shipping|transport/.test(path)) return { website: 'cart', page: 'transport' };
+    if (/price|table/.test(path)) return { website: 'cart', page: 'table' };
+    return { website: 'cart', page: 'home' };
+  }
+
+  function applyThemeValue(selector, field, value) {
+    if (value == null || value === '') return;
+    document.querySelectorAll(selector).forEach(el => {
+      const style = el.style;
+      const cssFields = {
+        font_family: 'font-family', font_size: 'font-size', font_weight: 'font-weight',
+        line_height: 'line-height', letter_spacing: 'letter-spacing', text_color: 'color',
+        background_color: 'background-color', border_color: 'border-color',
+        border_width: 'border-width', border_radius: 'border-radius', box_shadow: 'box-shadow',
+        padding: 'padding', margin: 'margin', width: 'width', max_width: 'max-width',
+        text_align: 'text-align'
+      };
+      if (field === 'content_value') el.textContent = String(value);
+      else if (cssFields[field]) style.setProperty(cssFields[field], String(value));
+    });
+  }
+
+  async function hydrateDatabaseTheme() {
+    const target = themeWebsiteAndPage();
+    try {
+      const response = await customerApi('/cms/theme/' + encodeURIComponent(target.website) + '/' + encodeURIComponent(target.page));
+      const page = response?.page;
+      if (page) {
+        const root = document.documentElement;
+        const variables = {
+          '--rtc-db-background': page.background_color,
+          '--rtc-db-surface': page.surface_color,
+          '--rtc-db-surface-elevated': page.surface_elevated_color,
+          '--rtc-db-section': page.section_color,
+          '--rtc-db-header': page.header_color,
+          '--rtc-db-footer': page.footer_color,
+          '--rtc-db-text': page.text_color,
+          '--rtc-db-muted': page.muted_text_color,
+          '--rtc-db-heading': page.heading_color,
+          '--rtc-db-primary': page.primary_color,
+          '--rtc-db-primary-dark': page.primary_dark_color,
+          '--rtc-db-secondary': page.secondary_color,
+          '--rtc-db-accent': page.accent_color,
+          '--rtc-db-link': page.link_color,
+          '--rtc-db-border': page.border_color,
+          '--rtc-db-font-heading': page.font_heading,
+          '--rtc-db-font-body': page.font_body,
+          '--rtc-db-radius-small': page.radius_small,
+          '--rtc-db-radius-medium': page.radius_medium,
+          '--rtc-db-radius-large': page.radius_large
+        };
+        Object.entries(variables).forEach(([key, value]) => {
+          if (typeof value === 'string' && value.length < 160) root.style.setProperty(key, value);
+        });
+        root.dataset.databaseTheme = target.website + ':' + target.page;
+      }
+      const components = Array.isArray(response?.components) ? response.components : [];
+      for (const component of components) {
+        const key = String(component.component_key || '');
+        if (!/^[a-z0-9_-]{1,100}$/i.test(key)) continue;
+        const selectors = [
+          '[data-theme-component="' + key + '"]',
+          '[data-component-key="' + key + '"]',
+          '#component-' + key
+        ];
+        for (const selector of selectors) {
+          applyThemeValue(selector, 'content_value', component.content_value);
+          ['font_family','font_size','font_weight','line_height','letter_spacing','text_color',
+           'background_color','border_color','border_width','border_radius','box_shadow',
+           'padding','margin','width','max_width','text_align'].forEach(field => {
+            applyThemeValue(selector, field, component[field]);
+          });
+        }
+      }
+    } catch (error) {
+      // Keep the static/local theme working when the optional live theme API is unavailable.
+      console.warn('Database theme settings unavailable', error);
+    }
+  }
+
   async function hydrateCms(){
     const slugMap={'/about':'about','/shipping':'shipping','/privacy-policy':'privacy-policy','/terms-and-conditions':'terms-and-conditions'};
     const key=slugMap[location.pathname]; if(!key) return;
@@ -187,11 +284,11 @@
   async function adminContentEditor(){
     if(!isAdmin || !/admin_content_manager/.test(currentDir)) return;
     const rootEl=document.getElementById('rtc-cms-app'); if(!rootEl)return;
-    const kinds=['pages','home-sections','faqs','policies']; let current='pages';
+    const kinds=['theme-pages','theme-components','pages','home-sections','faqs','policies']; let current='theme-pages';
     const state={items:[],selected:null};
     const render=()=>{rootEl.innerHTML=`<div class="grid md:grid-cols-[260px_1fr] gap-6"><aside class="bg-white rounded-2xl border p-4"><h2 class="font-bold text-lg mb-4">Content types</h2>${kinds.map(k=>`<button data-kind="${k}" class="w-full text-left px-3 py-2 rounded-lg mb-1 ${k===current?'bg-red-600 text-white':'hover:bg-amber-50'}">${k}</button>`).join('')}</aside><section class="bg-white rounded-2xl border p-5"><div class="flex items-center justify-between gap-3 mb-4"><div><h2 class="font-bold text-xl">${current}</h2><p class="text-sm text-slate-500">Edit live content stored in the CMS database.</p></div><button id="cms-refresh" class="px-3 py-2 rounded-lg bg-slate-900 text-white">Refresh</button></div><div id="cms-list" class="space-y-2"></div><div id="cms-editor" class="mt-5"></div></section></div>`; rootEl.querySelectorAll('[data-kind]').forEach(b=>b.onclick=()=>{current=b.dataset.kind;load()}); rootEl.querySelector('#cms-refresh').onclick=load; };
-    async function load(){render(); try{state.items=await adminApi('/cms/'+current); if(!Array.isArray(state.items)) state.items=state.items?.items||[]; const list=rootEl.querySelector('#cms-list'); list.innerHTML=state.items.map((x,i)=>`<button data-i="${i}" class="w-full text-left p-3 rounded-lg border hover:border-red-400"><div class="font-semibold">${escapeHtml(x.title||x.question||x.policy_key||x.section_key||('Record '+(i+1)))}</div><div class="text-xs text-slate-500">ID ${x.page_id||x.faq_id||x.policy_id||x.section_id||'—'}</div></button>`).join('')||'<p class="text-slate-500">No records yet.</p>'; list.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>edit(state.items[Number(b.dataset.i)])); }catch(e){rootEl.querySelector('#cms-list').innerHTML=`<p class="text-red-600">${escapeHtml(e.message||'Admin authentication or API unavailable.')}</p>`}}
-    function edit(x){const ed=rootEl.querySelector('#cms-editor'); const id=x.page_id||x.faq_id||x.policy_id||x.section_id; ed.innerHTML=`<div class="border-t pt-5"><h3 class="font-bold mb-3">Edit record #${id}</h3><textarea id="cms-json" class="w-full min-h-72 p-3 border rounded-xl font-mono text-sm">${escapeHtml(JSON.stringify(x,null,2))}</textarea><div class="mt-3 flex gap-2"><button id="cms-save" class="px-4 py-2 rounded-lg bg-red-600 text-white">Save</button><button id="cms-cancel" class="px-4 py-2 rounded-lg border">Cancel</button></div></div>`; ed.querySelector('#cms-save').onclick=async()=>{try{const obj=JSON.parse(ed.querySelector('#cms-json').value); const payload={...obj}; delete payload.page_id;delete payload.faq_id;delete payload.policy_id;delete payload.section_id;delete payload.created_at;delete payload.updated_at; const id=x.page_id||x.faq_id||x.policy_id||x.section_id; await adminApi(`/cms/${current}/${id}`,{method:'PATCH',body:JSON.stringify({data:payload})}); notify('CMS record saved.');load();}catch(e){notify(e.message||'Save failed.','error')}}; ed.querySelector('#cms-cancel').onclick=()=>ed.innerHTML='';}
+    async function load(){render(); try{state.items=await adminApi('/cms/'+current); if(!Array.isArray(state.items)) state.items=state.items?.items||[]; const list=rootEl.querySelector('#cms-list'); list.innerHTML=state.items.map((x,i)=>`<button data-i="${i}" class="w-full text-left p-3 rounded-lg border hover:border-red-400"><div class="font-semibold">${escapeHtml(x.page_name||x.component_name||x.title||x.question||x.policy_key||x.component_key||x.section_key||('Record '+(i+1)))}</div><div class="text-xs text-slate-500">ID ${x.theme_page_id||x.theme_component_id||x.page_id||x.faq_id||x.policy_id||x.section_id||'—'}</div></button>`).join('')||'<p class="text-slate-500">No records yet.</p>'; list.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>edit(state.items[Number(b.dataset.i)])); }catch(e){rootEl.querySelector('#cms-list').innerHTML=`<p class="text-red-600">${escapeHtml(e.message||'Admin authentication or API unavailable.')}</p>`}}
+    function edit(x){const ed=rootEl.querySelector('#cms-editor'); const id=x.theme_page_id||x.theme_component_id||x.page_id||x.faq_id||x.policy_id||x.section_id; ed.innerHTML=`<div class="border-t pt-5"><h3 class="font-bold mb-3">Edit record #${id}</h3><textarea id="cms-json" class="w-full min-h-72 p-3 border rounded-xl font-mono text-sm">${escapeHtml(JSON.stringify(x,null,2))}</textarea><div class="mt-3 flex gap-2"><button id="cms-save" class="px-4 py-2 rounded-lg bg-red-600 text-white">Save</button><button id="cms-cancel" class="px-4 py-2 rounded-lg border">Cancel</button></div></div>`; ed.querySelector('#cms-save').onclick=async()=>{try{const obj=JSON.parse(ed.querySelector('#cms-json').value); const payload={...obj}; delete payload.theme_page_id;delete payload.theme_component_id;delete payload.website_key;delete payload.page_key;delete payload.section_key;delete payload.component_key;delete payload.page_id;delete payload.faq_id;delete payload.policy_id;delete payload.section_id;delete payload.created_at;delete payload.updated_at; const id=x.theme_page_id||x.theme_component_id||x.page_id||x.faq_id||x.policy_id||x.section_id; await adminApi(`/cms/${current}/${id}`,{method:'PATCH',body:JSON.stringify({data:payload})}); notify('CMS record saved.');load();}catch(e){notify(e.message||'Save failed.','error')}}; ed.querySelector('#cms-cancel').onclick=()=>ed.innerHTML='';}
     function escapeHtml(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
     load();
   }
@@ -264,7 +361,7 @@
   }
   function boot(){
     addThemeBar(); setLogo(); wireNavigation(); wireWhatsApp(); patchLocalLinks(); injectHomeBanner(); sanitizeCustomerContent(); addSyncBadge();
-    refreshCartBadge(); hydrateCms(); bindLogin(); bindRegistration(); bindAddToCart(); hydrateCatalog(); hydrateProduct(); hydrateCart(); hydrateCheckout(); adminContentEditor();
+    refreshCartBadge(); hydrateDatabaseTheme(); hydrateCms(); bindLogin(); bindRegistration(); bindAddToCart(); hydrateCatalog(); hydrateProduct(); hydrateCart(); hydrateCheckout(); adminContentEditor();
     window.RTApi={customerApi,adminApi,platformApi,notify,pageUrl,money,escapeHtml,escapeAttr,isAdmin,isAdminLogin,config:cfg};
     guardAdminSession();
   }
